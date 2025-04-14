@@ -11,7 +11,7 @@ export const API_ENDPOINTS = {
   CHAT: (sessionId: string) => `/conversation/chat/${sessionId}`,
 
   // 助理相关
-  USER_AGENTS: (userId: string) => `/agent/user/${userId}`,
+  USER_AGENTS: () => `/agent/user`,
   AGENT_DETAIL: (id: string) => `/agent/${id}`,
   CREATE_AGENT: "/agent",
   UPDATE_AGENT: (id: string) => `/agent/${id}`,

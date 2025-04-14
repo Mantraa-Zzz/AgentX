@@ -5,6 +5,7 @@ import type {
   Session,
   UpdateSessionParams,
 } from "@/types/conversation"
+import { API_ENDPOINTS, buildApiUrl } from "@/lib/api-config"
 
 // 构建查询字符串
 function buildQueryString(params: Record<string, any>): string {
@@ -26,17 +27,20 @@ function buildQueryString(params: Record<string, any>): string {
 // 创建会话
 export async function createSession(params: CreateSessionParams): Promise<ApiResponse<Session>> {
   try {
-    const queryString = buildQueryString(params)
-    const url = `/api/proxy/sessions${queryString}`
+    const url = buildApiUrl(API_ENDPOINTS.SESSIONS)
 
     console.log(`Creating session with URL: ${url}`)
+
+    // 移除userId参数，由后端自动获取
+    const { userId, ...requestData } = params
 
     const response = await fetch(url, {
       method: "POST",
       headers: {
-        Accept: "*/*",
         "Content-Type": "application/json",
+        Accept: "*/*",
       },
+      body: JSON.stringify(requestData),
     })
 
     const data = await response.json()
@@ -52,7 +56,7 @@ export async function createSession(params: CreateSessionParams): Promise<ApiRes
     return {
       code: 500,
       message: error instanceof Error ? error.message : "未知错误",
-      data: [] as Session[],
+      data: null as unknown as Session,
       timestamp: Date.now(),
     }
   }
@@ -61,8 +65,14 @@ export async function createSession(params: CreateSessionParams): Promise<ApiRes
 // 获取会话列表
 export async function getSessions(params: GetSessionsParams): Promise<ApiResponse<Session[]>> {
   try {
-    const queryString = buildQueryString(params)
-    const url = `/api/proxy/sessions${queryString}`
+    const queryParams: Record<string, any> = {}
+    
+    // 只保留archived参数
+    if (params.archived !== undefined) {
+      queryParams.archived = params.archived
+    }
+    
+    const url = buildApiUrl(API_ENDPOINTS.SESSIONS, queryParams)
 
     console.log(`Fetching sessions with URL: ${url}`)
 
@@ -96,7 +106,7 @@ export async function getSessions(params: GetSessionsParams): Promise<ApiRespons
 // 获取单个会话详情
 export async function getSession(sessionId: string): Promise<ApiResponse<Session>> {
   try {
-    const url = `/api/proxy/sessions/${sessionId}`
+    const url = buildApiUrl(API_ENDPOINTS.SESSION_DETAIL(sessionId))
 
     console.log(`Fetching session with URL: ${url}`)
 
@@ -130,8 +140,7 @@ export async function getSession(sessionId: string): Promise<ApiResponse<Session
 // 更新会话
 export async function updateSession(sessionId: string, params: UpdateSessionParams): Promise<ApiResponse<Session>> {
   try {
-    const queryString = buildQueryString(params)
-    const url = `/api/proxy/sessions/${sessionId}${queryString}`
+    const url = buildApiUrl(API_ENDPOINTS.SESSION_DETAIL(sessionId), params)
 
     console.log(`Updating session with URL: ${url}`)
 
@@ -165,7 +174,7 @@ export async function updateSession(sessionId: string, params: UpdateSessionPara
 // 删除会话
 export async function deleteSession(sessionId: string): Promise<ApiResponse<null>> {
   try {
-    const url = `/api/proxy/sessions/${sessionId}`
+    const url = buildApiUrl(API_ENDPOINTS.SESSION_DETAIL(sessionId))
 
     console.log(`Deleting session with URL: ${url}`)
 

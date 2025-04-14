@@ -23,10 +23,10 @@ interface Message {
 interface StreamData {
   content: string
   done: boolean
-  sessionId: string
-  provider: string
-  model: string
-  timestamp: number
+  sessionId?: string
+  provider?: string
+  model?: string
+  timestamp?: number
 }
 
 export function ChatPanel({ conversationId }: ChatPanelProps) {
@@ -148,34 +148,11 @@ export function ChatPanel({ conversationId }: ChatPanelProps) {
     scrollToBottom()
   }, [messages, displayedContent])
 
-  // 打字机效果
+  // 移除打字机效果，直接显示内容
+  // 之前的打字机效果导致闪烁是因为每次内容更新都会重置
   useEffect(() => {
-    if (streamingContent === "") {
-      setDisplayedContent("")
-      return
-    }
-
-    // 清除之前的定时器
-    if (typewriterTimerRef.current) {
-      clearTimeout(typewriterTimerRef.current)
-    }
-
-    let currentIndex = 0
-    const typeNextChar = () => {
-      if (currentIndex < streamingContent.length) {
-        setDisplayedContent(streamingContent.substring(0, currentIndex + 1))
-        currentIndex++
-        typewriterTimerRef.current = setTimeout(typeNextChar, 10) // 调整速度
-      }
-    }
-
-    typeNextChar()
-
-    return () => {
-      if (typewriterTimerRef.current) {
-        clearTimeout(typewriterTimerRef.current)
-      }
-    }
+    // 直接显示流式内容，不使用打字机效果
+    setDisplayedContent(streamingContent)
   }, [streamingContent])
 
   // 处理SSE格式的流式响应
@@ -208,7 +185,9 @@ export function ChatPanel({ conversationId }: ChatPanelProps) {
           if (line.startsWith("data:")) {
             try {
               // 提取JSON部分
-              const jsonStr = line.slice(5)
+              const jsonStr = line.slice(5).trim()
+              if (!jsonStr) continue
+              
               const data: StreamData = JSON.parse(jsonStr)
 
               // 只处理内容部分
@@ -243,23 +222,25 @@ export function ChatPanel({ conversationId }: ChatPanelProps) {
       // 处理最后可能的不完整行
       if (buffer.startsWith("data:")) {
         try {
-          const jsonStr = buffer.slice(5)
-          const data: StreamData = JSON.parse(jsonStr)
+          const jsonStr = buffer.slice(5).trim()
+          if (jsonStr) {
+            const data: StreamData = JSON.parse(jsonStr)
 
-          if (data.content) {
-            streamedText += data.content
-            setStreamingContent(streamedText)
-          }
-
-          if (data.done && streamedText) {
-            const assistantMessage: Message = {
-              id: `m${Date.now() + 1}`,
-              role: "assistant",
-              content: streamedText,
+            if (data.content) {
+              streamedText += data.content
+              setStreamingContent(streamedText)
             }
 
-            setMessages((prev) => [...prev, assistantMessage])
-            setStreamingContent("")
+            if (data.done && streamedText) {
+              const assistantMessage: Message = {
+                id: `m${Date.now() + 1}`,
+                role: "assistant",
+                content: streamedText,
+              }
+
+              setMessages((prev) => [...prev, assistantMessage])
+              setStreamingContent("")
+            }
           }
         } catch (e) {
           console.error("Error parsing final SSE data:", e, buffer)
@@ -277,10 +258,14 @@ export function ChatPanel({ conversationId }: ChatPanelProps) {
         setMessages((prev) => [...prev, assistantMessage])
         setStreamingContent("")
       }
-    } catch (error) {
-      console.error("Error reading stream:", error)
-      // 如果是用户主动中断，不显示错误
-      if (error.name !== "AbortError") {
+    } catch (error: any) {
+      // 检查错误是否是由于用户主动中止请求引起的
+      if (error.name === "AbortError") {
+        console.log("Stream reading was aborted by user")
+        // 中止请求是预期行为，不需要显示错误提示
+      } else {
+        // 对于其他类型的错误，记录日志并显示错误提示
+        console.error("Error reading stream:", error)
         toast({
           title: "读取响应时出错",
           description: "请稍后再试",
@@ -288,8 +273,11 @@ export function ChatPanel({ conversationId }: ChatPanelProps) {
         })
       }
     } finally {
+      // 清理资源，重置状态
       setIsTyping(false)
-      abortControllerRef.current = null
+      if (abortControllerRef.current) {
+        abortControllerRef.current = null
+      }
     }
   }
 
@@ -313,14 +301,17 @@ export function ChatPanel({ conversationId }: ChatPanelProps) {
       // 创建 AbortController 用于取消请求
       abortControllerRef.current = new AbortController()
 
-      // 调用API获取流式响应
-      const response = await streamChat(sentMessage, conversationId)
+      // 调用API获取流式响应，传递AbortController的signal
+      const response = await streamChat(sentMessage, conversationId, abortControllerRef.current.signal)
       await handleSSEResponse(response)
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error sending message:", error)
 
-      // 如果不是用户主动中断，则显示错误消息
-      if (error.name !== "AbortError") {
+      // 如果是用户主动中断，不显示错误消息
+      if (error.name === "AbortError") {
+        console.log("Message sending was aborted by user")
+        // 不需要显示错误提示
+      } else {
         // 显示错误提示
         toast({
           title: "发送消息失败",
@@ -339,7 +330,9 @@ export function ChatPanel({ conversationId }: ChatPanelProps) {
       }
     } finally {
       setIsTyping(false)
-      abortControllerRef.current = null
+      if (abortControllerRef.current) {
+        abortControllerRef.current = null
+      }
     }
   }
 
@@ -347,10 +340,22 @@ export function ChatPanel({ conversationId }: ChatPanelProps) {
   const stopResponse = () => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort()
-      abortControllerRef.current = null
+      // 不要立即设置为null，让handleSSEResponse中的catch块处理它
     }
+    
+    // 立即清除UI状态
     setIsTyping(false)
-    setStreamingContent("")
+    
+    // 添加最后接收到的内容到消息列表，以便用户看到已经生成的部分回答
+    if (streamingContent) {
+      const assistantMessage: Message = {
+        id: `m${Date.now() + 1}`,
+        role: "assistant",
+        content: streamingContent,
+      }
+      setMessages((prev) => [...prev, assistantMessage])
+      setStreamingContent("")
+    }
 
     // 清除打字机效果定时器
     if (typewriterTimerRef.current) {

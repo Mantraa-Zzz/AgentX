@@ -8,7 +8,7 @@ export async function GET(request: NextRequest, { params }: { params: { userId: 
     const name = searchParams.get("name")
 
     // 构建API URL
-    let apiUrl = `${API_CONFIG.BASE_URL}/agent/user/${userId}`
+    let apiUrl = `${API_CONFIG.BASE_URL}/agent/user`
     const queryParams: Record<string, string> = {}
 
     if (name) {

@@ -13,7 +13,6 @@ import type {
 // 获取用户的助理列表
 export async function getUserAgents(params?: Partial<GetAgentsParams>): Promise<ApiResponse<Agent[]>> {
   try {
-    const userId = params?.userId || API_CONFIG.CURRENT_USER_ID
     const queryParams: Record<string, any> = {}
 
     // 添加名称搜索参数
@@ -21,7 +20,7 @@ export async function getUserAgents(params?: Partial<GetAgentsParams>): Promise<
       queryParams.name = params.name
     }
 
-    const url = buildApiUrl(API_ENDPOINTS.USER_AGENTS(userId), queryParams)
+    const url = buildApiUrl(API_ENDPOINTS.USER_AGENTS(), queryParams)
 
     console.log(`Fetching user agents from: ${url}`)
 
@@ -364,10 +363,15 @@ export async function getAgentVersion(agentId: string, versionNumber: string): P
 // 搜索助理
 export async function searchAgents(params: SearchAgentsRequest): Promise<ApiResponse<Agent[]>> {
   try {
-    const userId = API_CONFIG.CURRENT_USER_ID
-    const url = buildApiUrl(API_ENDPOINTS.USER_AGENTS(userId), params)
+    const queryParams: Record<string, any> = {}
 
-    console.log(`Searching agents at: ${url}`)
+    if (params.name) {
+      queryParams.name = params.name;
+    }
+
+    const url = buildApiUrl(API_ENDPOINTS.USER_AGENTS(), queryParams)
+
+    console.log(`Searching agents from: ${url}`)
 
     const response = await fetch(url, {
       method: "GET",

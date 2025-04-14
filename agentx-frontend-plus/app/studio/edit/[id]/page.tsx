@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useEffect, useState, useRef } from "react"
+import { useEffect, useState, useRef, use } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import {
@@ -105,6 +105,8 @@ interface AgentFormData {
 }
 
 export default function EditAgentPage({ params }: { params: { id: string } }) {
+  // 使用React.use()解包params
+  const id = use(params).id;
   const router = useRouter()
   const [selectedType, setSelectedType] = useState<AgentType>("chat")
   const [activeTab, setActiveTab] = useState("basic")
@@ -147,7 +149,7 @@ export default function EditAgentPage({ params }: { params: { id: string } }) {
     async function fetchAgentDetail() {
       try {
         setIsLoading(true)
-        const response = await getAgentDetail(params.id)
+        const response = await getAgentDetail(id)
 
         if (response.code === 200 && response.data) {
           const agent = response.data
@@ -194,7 +196,7 @@ export default function EditAgentPage({ params }: { params: { id: string } }) {
     }
 
     fetchAgentDetail()
-  }, [params.id, router])
+  }, [id, router])
 
   // 更新表单字段
   const updateFormField = (field: string, value: any) => {
@@ -322,7 +324,7 @@ export default function EditAgentPage({ params }: { params: { id: string } }) {
       }
 
       // 调用API更新助理
-      const response = await updateAgent(params.id, agentData)
+      const response = await updateAgent(id, agentData)
 
       if (response.code === 200) {
         toast({
@@ -353,7 +355,7 @@ export default function EditAgentPage({ params }: { params: { id: string } }) {
     setIsDeleting(true)
 
     try {
-      const response = await deleteAgent(params.id)
+      const response = await deleteAgent(id)
 
       if (response.code === 200) {
         toast({
@@ -386,7 +388,7 @@ export default function EditAgentPage({ params }: { params: { id: string } }) {
     setIsTogglingStatus(true)
 
     try {
-      const response = await toggleAgentStatus(params.id)
+      const response = await toggleAgentStatus(id)
 
       if (response.code === 200) {
         toast({
@@ -427,7 +429,7 @@ export default function EditAgentPage({ params }: { params: { id: string } }) {
     setIsPublishing(true)
 
     try {
-      const response = await publishAgentVersion(params.id, {
+      const response = await publishAgentVersion(id, {
         versionNumber,
         changeLog: changeLog || `发布 ${versionNumber} 版本`,
         systemPrompt: formData.systemPrompt,
@@ -477,7 +479,7 @@ export default function EditAgentPage({ params }: { params: { id: string } }) {
     setVersions([])
 
     try {
-      const response = await getAgentVersions(params.id)
+      const response = await getAgentVersions(id)
 
       if (response.code === 200) {
         setVersions(response.data)

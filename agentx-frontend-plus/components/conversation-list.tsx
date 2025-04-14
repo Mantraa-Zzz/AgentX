@@ -49,8 +49,8 @@ export function ConversationList({ workspaceId }: ConversationListProps) {
   const fetchSessions = async () => {
     try {
       setLoading(true)
-      // 这里使用固定的userId=1，实际应用中应该从用户认证中获取
-      const response = await getSessions({ userId: "1" })
+      // 无需传递userId参数，后端会自动获取当前用户ID
+      const response = await getSessions({})
       if (response.code === 200) {
         setSessions(response.data)
         // 如果有会话但没有选中的会话，则选中第一个
@@ -90,7 +90,6 @@ export function ConversationList({ workspaceId }: ConversationListProps) {
     try {
       const response = await createSession({
         title: newSessionTitle,
-        userId: "1", // 固定用户ID
         description: newSessionDescription || undefined,
       })
 

@@ -30,7 +30,7 @@ export default function WorkspacePage() {
     async function fetchAgents() {
       try {
         setLoadingAgents(true)
-        const response = await getUserAgents({ userId: "1" })
+        const response = await getUserAgents({})
         if (response.code === 200) {
           setAgents(response.data)
         }

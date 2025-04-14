@@ -152,7 +152,7 @@ export function Sidebar() {
       try {
         setLoading(true)
         setError(null)
-        const response = await getUserAgents({ userId: "1" })
+        const response = await getUserAgents()
 
         if (response.code === 200) {
           setAgents(response.data)

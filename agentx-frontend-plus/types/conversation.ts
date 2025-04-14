@@ -19,13 +19,13 @@ export interface ApiResponse<T> {
 // 创建会话请求参数
 export interface CreateSessionParams {
   title: string
-  userId: string
+  userId?: string
   description?: string
 }
 
 // 获取会话列表请求参数
 export interface GetSessionsParams {
-  userId: string
+  userId?: string
   archived?: boolean
 }
 
