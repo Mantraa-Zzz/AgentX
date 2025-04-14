@@ -43,3 +43,4 @@ logs/
 ### System Files ###
 .DS_Store
 Thumbs.db
+./AgentX-front/node_modules
