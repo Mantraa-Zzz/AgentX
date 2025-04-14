@@ -3,8 +3,8 @@ export async function streamChat(message: string, sessionId?: string) {
     throw new Error("Session ID is required")
   }
 
-  // 构建完整的API URL
-  const url = new URL(`/api/proxy/agent/session/${sessionId}/message`, window.location.origin)
+  // 修改URL直接请求本地8080端口的后端服务
+  const url = new URL(`http://localhost:8080/api/agent/session/${sessionId}/message`)
 
   // 发送请求
   try {

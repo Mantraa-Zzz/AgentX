@@ -28,7 +28,7 @@ function buildQueryString(params: Record<string, any>): string {
 export async function createSession(params: CreateSessionParams): Promise<ApiResponse<Session>> {
   try {
     const queryString = buildQueryString(params)
-    const url = `/api/proxy/sessions${queryString}`
+    const url = `http://localhost:8080/api/sessions${queryString}`
 
     const response = await fetch(url, {
       method: "POST",
@@ -61,7 +61,7 @@ export async function createSession(params: CreateSessionParams): Promise<ApiRes
 export async function getSessions(params: GetSessionsParams): Promise<ApiResponse<Session[]>> {
   try {
     const queryString = buildQueryString(params)
-    const url = `/api/proxy/sessions${queryString}`
+    const url = `http://localhost:8080/api/sessions${queryString}`
 
     console.log(`Fetching sessions with URL: ${url}`)
 
@@ -95,7 +95,7 @@ export async function getSessions(params: GetSessionsParams): Promise<ApiRespons
 // 获取单个会话详情
 export async function getSession(sessionId: string): Promise<ApiResponse<Session>> {
   try {
-    const url = `/api/proxy/sessions/${sessionId}`
+    const url = `http://localhost:8080/api/sessions/${sessionId}`
 
     console.log(`Fetching session with URL: ${url}`)
 
@@ -130,7 +130,7 @@ export async function getSession(sessionId: string): Promise<ApiResponse<Session
 export async function updateSession(sessionId: string, params: UpdateSessionParams): Promise<ApiResponse<Session>> {
   try {
     const queryString = buildQueryString(params)
-    const url = `/api/proxy/sessions/${sessionId}${queryString}`
+    const url = `http://localhost:8080/api/sessions/${sessionId}${queryString}`
 
     console.log(`Updating session with URL: ${url}`)
 
@@ -164,7 +164,7 @@ export async function updateSession(sessionId: string, params: UpdateSessionPara
 // 删除会话
 export async function deleteSession(sessionId: string): Promise<ApiResponse<null>> {
   try {
-    const url = `/api/proxy/sessions/${sessionId}`
+    const url = `http://localhost:8080/api/sessions/${sessionId}`
 
     console.log(`Deleting session with URL: ${url}`)
 
