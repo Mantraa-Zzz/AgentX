@@ -94,7 +94,7 @@ echo -e "${GREEN}等待 PostgreSQL 启动...${NC}"
 sleep 5
 
 # 确认 PostgreSQL 是否已准备好接受连接
-RETRIES=10
+RETRIES=3
 until docker exec agentx-postgres pg_isready -U postgres -d agentx > /dev/null 2>&1 || [ $RETRIES -eq 0 ]; do
     echo "等待 PostgreSQL 启动中，剩余尝试次数: $RETRIES"
     RETRIES=$((RETRIES-1))

@@ -52,7 +52,7 @@ export enum AgentType {
 
 // 获取助理列表请求参数
 export interface GetAgentsParams {
-  userId: string
+  userId?: string
   name?: string // 添加名称搜索参数
 }
 
@@ -97,7 +97,7 @@ export interface PublishAgentVersionRequest {
 
 // 搜索助理请求参数
 export interface SearchAgentsRequest {
-  name?: string
+  name?: string;
 }
 
 // 助理版本信息

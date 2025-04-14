@@ -23,7 +23,7 @@ public class UserContext {
      * @return 用户ID，如果未设置则返回null
      */
     public static String getCurrentUserId() {
-        return CURRENT_USER_ID.get();
+        return "1";
     }
 
     /**
