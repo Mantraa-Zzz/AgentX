@@ -2,12 +2,12 @@
 CREATE TABLE sessions (
     id VARCHAR(36) PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
+    user_id VARCHAR(36) NOT NULL,
+    agent_id VARCHAR(36),
+    description TEXT,
     created_at TIMESTAMP NOT NULL,
     updated_at TIMESTAMP NOT NULL,
-    user_id VARCHAR(36) NOT NULL,
-    agent_id VARCHAR(36), -- 关联的Agent ID，指定该会话使用的Agent
     is_archived BOOLEAN DEFAULT FALSE,
-    description TEXT,
     metadata JSONB
 );
 
@@ -21,8 +21,7 @@ CREATE TABLE messages (
     token_count INTEGER,
     provider VARCHAR(50),
     model VARCHAR(50),
-    metadata JSONB,
-    FOREIGN KEY (session_id) REFERENCES sessions(id)
+    metadata TEXT
 );
 
 -- 上下文表，管理对话上下文
@@ -31,19 +30,8 @@ CREATE TABLE context (
     session_id VARCHAR(36) NOT NULL,
     active_messages JSONB,
     summary TEXT,
-    updated_at TIMESTAMP NOT NULL,
-    FOREIGN KEY (session_id) REFERENCES sessions(id)
+    updated_at TIMESTAMP NOT NULL
 );
-
--- 创建索引
-CREATE INDEX idx_sessions_user_id ON sessions(user_id);
-CREATE INDEX idx_sessions_created_at ON sessions(created_at);
-CREATE INDEX idx_sessions_updated_at ON sessions(updated_at);
-
-CREATE INDEX idx_messages_session_id ON messages(session_id);
-CREATE INDEX idx_messages_created_at ON messages(created_at);
-
-CREATE INDEX idx_context_session_id ON context(session_id);
 
 -- Agent 相关表结构
 CREATE TABLE agents (
@@ -51,22 +39,18 @@ CREATE TABLE agents (
     name VARCHAR(50) NOT NULL,
     avatar VARCHAR(255),
     description TEXT,
-    -- 当前编辑中的配置
     system_prompt TEXT,
     welcome_message TEXT,
     model_config JSONB,
     tools JSONB,
     knowledge_base_ids JSONB,
-    -- 版本管理
-    published_version VARCHAR(36), -- 当前发布的版本ID
-    -- Agent状态：false-禁用，true-启用
+    published_version VARCHAR(36),
     enabled BOOLEAN DEFAULT TRUE,
-    -- Agent类型：1-聊天助手, 2-功能性Agent
     agent_type SMALLINT DEFAULT 1,
     user_id VARCHAR(36) NOT NULL,
     created_at TIMESTAMP NOT NULL,
     updated_at TIMESTAMP NOT NULL,
-    deleted_at TIMESTAMP -- 软删除标记
+    deleted_at TIMESTAMP
 );
 
 -- Agent版本表
@@ -76,23 +60,22 @@ CREATE TABLE agent_versions (
     name VARCHAR(50) NOT NULL,
     avatar VARCHAR(255),
     description TEXT,
-    version_number VARCHAR(20) NOT NULL, -- 版本号，如1.0.0
+    version_number VARCHAR(20) NOT NULL,
     system_prompt TEXT,
     welcome_message TEXT,
     model_config JSONB,
     tools JSONB,
     knowledge_base_ids JSONB,
-    change_log TEXT, -- 版本更新日志
-    agent_type SMALLINT DEFAULT 1, -- Agent类型：1-聊天助手, 2-功能性Agent
-    publish_status SMALLINT DEFAULT 1, -- 1-审核中, 2-已发布, 3-拒绝, 4-已下架
+    change_log TEXT,
+    agent_type SMALLINT DEFAULT 1,
+    publish_status SMALLINT DEFAULT 1,
     reject_reason TEXT,
     review_time TIMESTAMP,
-    published_at TIMESTAMP, -- 发布时间
+    published_at TIMESTAMP,
     user_id VARCHAR(36) NOT NULL,
     created_at TIMESTAMP NOT NULL,
     updated_at TIMESTAMP NOT NULL,
-    deleted_at TIMESTAMP, -- 软删除标记
-    FOREIGN KEY (agent_id) REFERENCES agents(id)
+    deleted_at TIMESTAMP
 );
 
 -- Agent工作区表
@@ -101,7 +84,6 @@ CREATE TABLE agent_workspace (
     agent_id VARCHAR(36) NOT NULL,
     user_id VARCHAR(36) NOT NULL,
     created_at TIMESTAMP NOT NULL,
-    FOREIGN KEY (agent_id) REFERENCES agents(id),
     UNIQUE (agent_id, user_id)
 );
 
@@ -125,26 +107,36 @@ CREATE TABLE llm_responses (
     content TEXT NOT NULL,
     token_count INTEGER,
     finish_reason VARCHAR(20),
-    created_at TIMESTAMP NOT NULL,
-    FOREIGN KEY (request_id) REFERENCES llm_requests(id)
+    created_at TIMESTAMP NOT NULL
 );
 
 -- 创建索引
+CREATE INDEX idx_sessions_user_id ON sessions(user_id);
+CREATE INDEX idx_sessions_created_at ON sessions(created_at);
+CREATE INDEX idx_sessions_updated_at ON sessions(updated_at);
+CREATE INDEX idx_sessions_agent_id ON sessions(agent_id);
+
+CREATE INDEX idx_messages_session_id ON messages(session_id);
+CREATE INDEX idx_messages_created_at ON messages(created_at);
+
+CREATE INDEX idx_context_session_id ON context(session_id);
+
 CREATE INDEX idx_agents_user_id ON agents(user_id);
 CREATE INDEX idx_agents_enabled ON agents(enabled);
 CREATE INDEX idx_agents_agent_type ON agents(agent_type);
 CREATE INDEX idx_agents_name ON agents(name);
+
 CREATE INDEX idx_agent_versions_agent_id ON agent_versions(agent_id);
 CREATE INDEX idx_agent_versions_published_at ON agent_versions(published_at);
 CREATE INDEX idx_agent_versions_publish_status ON agent_versions(publish_status);
+
 CREATE INDEX idx_agent_workspace_user_id ON agent_workspace(user_id);
 CREATE INDEX idx_agent_workspace_agent_id ON agent_workspace(agent_id);
-
-CREATE INDEX idx_sessions_agent_id ON sessions(agent_id);
 
 CREATE INDEX idx_llm_requests_session_id ON llm_requests(session_id);
 CREATE INDEX idx_llm_requests_user_id ON llm_requests(user_id);
 CREATE INDEX idx_llm_requests_created_at ON llm_requests(created_at);
+
 CREATE INDEX idx_llm_responses_request_id ON llm_responses(request_id);
 
 -- 添加表和列的注释
@@ -157,7 +149,7 @@ COMMENT ON TABLE messages IS '消息表，存储会话中的所有消息';
 COMMENT ON COLUMN messages.role IS '消息角色：user、assistant或system';
 COMMENT ON COLUMN messages.token_count IS '消息的token数量';
 COMMENT ON COLUMN messages.provider IS 'LLM提供商，如OpenAI、Anthropic等';
-COMMENT ON COLUMN messages.metadata IS '消息的元数据，JSON格式';
+COMMENT ON COLUMN messages.metadata IS '消息的元数据';
 
 COMMENT ON TABLE context IS '上下文表，管理对话上下文';
 COMMENT ON COLUMN context.active_messages IS '当前活跃的消息ID列表，JSON格式';
