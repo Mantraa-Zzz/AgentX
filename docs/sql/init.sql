@@ -121,7 +121,7 @@ CREATE TABLE IF NOT EXISTS agent_workspace (
     id VARCHAR(36) PRIMARY KEY,
     agent_id VARCHAR(36) NOT NULL,
     user_id VARCHAR(36) NOT NULL,
-    model_id VARCHAR(36),
+    llm_model_config JSONB,
     created_at TIMESTAMP NOT NULL,
     updated_at TIMESTAMP NOT NULL,
     deleted_at TIMESTAMP,
@@ -205,7 +205,7 @@ COMMENT ON COLUMN agent_versions.published_at IS '发布时间';
 COMMENT ON COLUMN agent_versions.deleted_at IS '软删除标记';
 
 COMMENT ON TABLE agent_workspace IS 'Agent工作区表，记录用户添加到工作区的Agent';
-COMMENT ON COLUMN agent_workspace.model_id IS '关联的模型ID';
+COMMENT ON COLUMN agent_workspace.llm_model_config IS 'LLM模型配置';
 
 COMMENT ON TABLE providers IS 'LLM服务提供商表';
 COMMENT ON COLUMN providers.id IS '提供商唯一ID';
