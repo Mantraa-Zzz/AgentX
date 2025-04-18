@@ -87,28 +87,7 @@ CREATE TABLE agent_workspace (
     UNIQUE (agent_id, user_id)
 );
 
--- LLM请求记录表
-CREATE TABLE llm_requests (
-    id VARCHAR(36) PRIMARY KEY,
-    model VARCHAR(50) NOT NULL,
-    temperature DOUBLE PRECISION,
-    max_tokens INTEGER,
-    is_stream BOOLEAN DEFAULT FALSE,
-    messages JSONB NOT NULL,
-    created_at TIMESTAMP NOT NULL,
-    session_id VARCHAR(36),
-    user_id VARCHAR(36)
-);
 
--- LLM响应记录表
-CREATE TABLE llm_responses (
-    id VARCHAR(36) PRIMARY KEY,
-    request_id VARCHAR(36) NOT NULL,
-    content TEXT NOT NULL,
-    token_count INTEGER,
-    finish_reason VARCHAR(20),
-    created_at TIMESTAMP NOT NULL
-);
 
 -- 创建索引
 CREATE INDEX idx_sessions_user_id ON sessions(user_id);
@@ -133,11 +112,7 @@ CREATE INDEX idx_agent_versions_publish_status ON agent_versions(publish_status)
 CREATE INDEX idx_agent_workspace_user_id ON agent_workspace(user_id);
 CREATE INDEX idx_agent_workspace_agent_id ON agent_workspace(agent_id);
 
-CREATE INDEX idx_llm_requests_session_id ON llm_requests(session_id);
-CREATE INDEX idx_llm_requests_user_id ON llm_requests(user_id);
-CREATE INDEX idx_llm_requests_created_at ON llm_requests(created_at);
 
-CREATE INDEX idx_llm_responses_request_id ON llm_responses(request_id);
 
 -- 添加表和列的注释
 COMMENT ON TABLE sessions IS '会话表，存储用户与Agent的对话会话';
@@ -173,12 +148,3 @@ COMMENT ON COLUMN agent_versions.published_at IS '发布时间';
 COMMENT ON COLUMN agent_versions.deleted_at IS '软删除标记';
 
 COMMENT ON TABLE agent_workspace IS 'Agent工作区表，记录用户添加到工作区的Agent';
-
-COMMENT ON TABLE llm_requests IS 'LLM请求记录表，记录发送到LLM的请求';
-COMMENT ON COLUMN llm_requests.temperature IS '温度参数，控制生成文本的随机性';
-COMMENT ON COLUMN llm_requests.max_tokens IS '最大生成token数';
-COMMENT ON COLUMN llm_requests.is_stream IS '是否为流式响应';
-COMMENT ON COLUMN llm_requests.messages IS '发送的消息列表，JSON格式';
-
-COMMENT ON TABLE llm_responses IS 'LLM响应记录表，记录LLM的响应';
-COMMENT ON COLUMN llm_responses.finish_reason IS '结束原因：stop、length、content_filter等'; 
