@@ -22,6 +22,7 @@ import org.xhy.application.conversation.service.handler.content.ChatContext;
 import org.xhy.domain.conversation.model.MessageEntity;
 import org.xhy.domain.conversation.service.ContextDomainService;
 import org.xhy.domain.conversation.service.ConversationDomainService;
+import org.xhy.domain.conversation.service.MessageDomainService;
 import org.xhy.domain.task.constant.TaskStatus;
 import org.xhy.domain.task.model.TaskEntity;
 import org.xhy.domain.task.service.TaskDomainService;
@@ -58,13 +59,11 @@ public class AgentMessageHandler extends AbstractMessageHandler {
     private final InfoRequirementService infoRequirementService;
 
     public AgentMessageHandler(
-            ConversationDomainService conversationDomainService,
-            ContextDomainService contextDomainService,
             LLMServiceFactory llmServiceFactory,
             TaskManager taskManager,
             TaskSplitHandler taskSplitHandler, TaskExecutionHandler taskExecutionHandler, SummarizeHandler summarizeHandler,
-            AnalyserMessageHandler analyserMessageHandler, InfoRequirementService infoRequirementService) {
-        super(conversationDomainService, contextDomainService, llmServiceFactory);
+            AnalyserMessageHandler analyserMessageHandler, InfoRequirementService infoRequirementService, MessageDomainService messageDomainService) {
+        super(messageDomainService, llmServiceFactory);
         this.taskManager = taskManager;
         this.taskSplitHandler = taskSplitHandler;
         this.taskExecutionHandler = taskExecutionHandler;

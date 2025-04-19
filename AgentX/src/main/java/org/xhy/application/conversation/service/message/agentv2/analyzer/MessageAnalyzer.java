@@ -6,13 +6,17 @@ import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.chat.request.ChatRequest;
 import dev.langchain4j.model.chat.response.ChatResponse;
+import dev.langchain4j.service.AiServices;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.xhy.application.conversation.service.handler.content.ChatContext;
+import org.xhy.application.conversation.service.message.agent.analysis.dto.AnalyzerMessageDTO;
 import org.xhy.application.conversation.service.message.agent.template.AgentPromptTemplates;
 import org.xhy.application.conversation.service.message.agentv2.analysis.dto.AnalysisResultDTO;
+import org.xhy.application.conversation.service.message.agentv2.dto.AnalyzerMessage;
 import org.xhy.infrastructure.llm.LLMServiceFactory;
+import org.xhy.infrastructure.utils.JsonUtils;
 import org.xhy.infrastructure.utils.ModelResponseToJsonUtils;
 
 import java.util.ArrayList;
@@ -38,7 +42,7 @@ public class MessageAnalyzer {
      * 分析用户消息类型
      * 返回分析结果，包含消息类型和可能的直接回复
      */
-    public AnalysisResultDTO analyzeMessage(ChatContext chatContext) {
+    public Boolean analyzeMessage(ChatContext chatContext) {
         String userMessage = chatContext.getUserMessage();
         log.info("分析用户消息: {}", userMessage);
 
@@ -48,32 +52,17 @@ public class MessageAnalyzer {
                     chatContext.getProvider(),
                     chatContext.getModel());
 
-            // 构建请求
-            List<ChatMessage> messages = new ArrayList<>();
-            messages.add(new SystemMessage(AgentPromptTemplates.getAnalyserMessagePrompt(userMessage)));
-
-            // 构建请求对象
-            ChatRequest request = ChatRequest.builder()
-                    .messages(messages)
-                    .build();
-
+            ChatRequest request = chatContext.prepareChatRequest().build();
+            request.messages().add(new SystemMessage(AgentPromptTemplates.getAnalyserMessagePrompt()));
             // 调用模型分析
             ChatResponse response = model.chat(request);
-            String analysisResponse = response.aiMessage().text();
 
-            // 解析结果
-            AnalysisResultDTO result = ModelResponseToJsonUtils.toJson(
-                    analysisResponse, AnalysisResultDTO.class);
+            String text = response.aiMessage().text();
+            return Boolean.valueOf(text.trim());
 
-            if (result != null) {
-                log.info("消息分析结果: isQuestion={}", result.isQuestion());
-                return result;
-            }
         } catch (Exception e) {
             log.error("解析消息分析结果出错", e);
         }
-
-        // 默认作为任务消息处理
-        return new AnalysisResultDTO(false, "");
+        return false;
     }
 }

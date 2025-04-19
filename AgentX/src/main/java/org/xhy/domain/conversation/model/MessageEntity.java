@@ -161,4 +161,30 @@ public class MessageEntity extends BaseEntity {
     public void setMetadata(String metadata) {
         this.metadata = metadata;
     }
+
+    /**
+     * 判断是否为用户消息
+     * @return 是否为用户消息
+     */
+    public boolean isUserMessage() {
+        return Role.USER.equals(this.role);
+    }
+    
+    /**
+     * 判断是否为助手消息
+     * @return 是否为助手消息
+     */
+    public boolean isAssistantMessage() {
+        return Role.ASSISTANT.equals(this.role);
+    }
+
+    /**
+     * 判断是否为系统提示词
+     * @return 是否为系统消息
+     */
+    public boolean isSystemMessage() {
+        return Role.SYSTEM.equals(this.role);
+    }
+
+
 }

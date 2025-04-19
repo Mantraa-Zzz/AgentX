@@ -11,6 +11,7 @@ import org.xhy.domain.conversation.constant.Role;
 import org.xhy.domain.conversation.model.MessageEntity;
 import org.xhy.domain.conversation.service.ContextDomainService;
 import org.xhy.domain.conversation.service.ConversationDomainService;
+import org.xhy.domain.conversation.service.MessageDomainService;
 import org.xhy.infrastructure.llm.LLMServiceFactory;
 import org.xhy.infrastructure.transport.MessageTransport;
 
@@ -31,17 +32,15 @@ public abstract class AbstractMessageHandler {
     protected static final String SUMMARY_PREFIX = "以下是用户历史消息的摘要，请仅作为参考，用户没有提起则不要回答摘要中的内容：\\n";
 
 
-    protected final ConversationDomainService conversationDomainService;
-    protected final ContextDomainService contextDomainService;
+    protected final MessageDomainService messageDomainService;
+
     protected final LLMServiceFactory llmServiceFactory;
 
 
     public AbstractMessageHandler(
-            ConversationDomainService conversationDomainService,
-            ContextDomainService contextDomainService,
+            MessageDomainService messageDomainService,
             LLMServiceFactory llmServiceFactory) {
-        this.conversationDomainService = conversationDomainService;
-        this.contextDomainService = contextDomainService;
+        this.messageDomainService = messageDomainService;
         this.llmServiceFactory = llmServiceFactory;
     }
 
@@ -130,12 +129,6 @@ public abstract class AbstractMessageHandler {
 
    protected void saveMessages(ChatContext chatContext,MessageEntity userMessageEntity,MessageEntity llmMessageEntity){
        // 保存消息
-       conversationDomainService.insertBathMessage(Arrays.asList(userMessageEntity, llmMessageEntity));
-
-       // 更新上下文
-       List<String> activeMessages = chatContext.getContextEntity().getActiveMessages();
-       activeMessages.add(userMessageEntity.getId());
-       activeMessages.add(llmMessageEntity.getId());
-       contextDomainService.insertOrUpdate(chatContext.getContextEntity());
+       messageDomainService.saveMessageAndUpdateContext(Arrays.asList(userMessageEntity, llmMessageEntity),chatContext.getContextEntity());
    }
 }

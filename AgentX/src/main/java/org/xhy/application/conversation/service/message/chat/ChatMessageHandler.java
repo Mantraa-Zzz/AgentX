@@ -12,6 +12,7 @@ import org.xhy.application.conversation.service.handler.content.ChatContext;
 import org.xhy.domain.conversation.model.MessageEntity;
 import org.xhy.domain.conversation.service.ContextDomainService;
 import org.xhy.domain.conversation.service.ConversationDomainService;
+import org.xhy.domain.conversation.service.MessageDomainService;
 import org.xhy.infrastructure.llm.LLMServiceFactory;
 import org.xhy.infrastructure.transport.MessageTransport;
 
@@ -22,8 +23,8 @@ import org.xhy.infrastructure.transport.MessageTransport;
 public class ChatMessageHandler extends AbstractMessageHandler {
 
 
-    public ChatMessageHandler(ConversationDomainService conversationDomainService, ContextDomainService contextDomainService, LLMServiceFactory llmServiceFactory) {
-        super(conversationDomainService, contextDomainService, llmServiceFactory);
+    public ChatMessageHandler(MessageDomainService messageDomainService , LLMServiceFactory llmServiceFactory) {
+        super(messageDomainService, llmServiceFactory);
     }
 
     @Override

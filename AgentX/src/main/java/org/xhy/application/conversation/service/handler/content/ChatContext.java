@@ -159,13 +159,13 @@ public class ChatContext {
 
         // 3. 添加对话历史
         for (MessageEntity messageEntity : this.getMessageHistory()) {
-            Role role = messageEntity.getRole();
             String content = messageEntity.getContent();
-            if (role == Role.USER) {
+            if (messageEntity.isUserMessage()) {
                 chatMessages.add(new UserMessage(content));
-            } else if (role == Role.SYSTEM) {
-                // 历史中的SYSTEM角色实际上是AI的回复
+            } else if (messageEntity.isAssistantMessage()) {
                 chatMessages.add(new AiMessage(content));
+            }else if (messageEntity.isSystemMessage()){
+                chatMessages.add(new SystemMessage(content));
             }
         }
 
@@ -181,7 +181,6 @@ public class ChatContext {
         // 设置消息和参数
         chatRequestBuilder.messages(chatMessages);
         chatRequestBuilder.parameters(parameters.build());
-
         return chatRequestBuilder;
     }
-} 
+}

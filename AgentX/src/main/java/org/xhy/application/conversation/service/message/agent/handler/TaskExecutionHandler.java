@@ -103,7 +103,7 @@ public class TaskExecutionHandler extends AbstractAgentHandler {
             // 保存执行消息
             MessageEntity taskCallMessageEntity = createMessageEntity(
                     context, MessageType.TASK_EXEC, taskName, 0);
-            messageDomainService.saveMessage(Collections.singletonList(taskCallMessageEntity));
+            messageDomainService.saveMessageAndUpdateContext(Collections.singletonList(taskCallMessageEntity),context.getChatContext().getContextEntity());
             
             // 通知前端当前执行的任务
             context.sendEndMessage(taskName, MessageType.TASK_EXEC);
@@ -185,7 +185,7 @@ public class TaskExecutionHandler extends AbstractAgentHandler {
         
         // 设置工具调用内容并保存
         toolCallMessageEntity.setContent(toolCallsContent.toString());
-        messageDomainService.saveMessage(Collections.singletonList(toolCallMessageEntity));
+        messageDomainService.saveMessageAndUpdateContext(Collections.singletonList(toolCallMessageEntity),context.getChatContext().getContextEntity());
         
         // 更新上下文
         context.getChatContext().getContextEntity().getActiveMessages().add(toolCallMessageEntity.getId());

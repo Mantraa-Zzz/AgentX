@@ -70,9 +70,10 @@ public class SseMessageTransport implements MessageTransport<SseEmitter> {
         try {
 
             connection.send(streamChatResponse);
-        } catch (IOException e) {
+            Thread.sleep(1000);
+        } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
-        }finally {
+        } finally {
             connection.complete();
         }
     }

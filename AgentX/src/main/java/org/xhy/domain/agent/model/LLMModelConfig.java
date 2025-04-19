@@ -115,4 +115,13 @@ public class LLMModelConfig {
     public void setSummaryThreshold(Integer summaryThreshold) {
         this.summaryThreshold = summaryThreshold;
     }
+    
+    /**
+     * 获取上下文大小
+     * 如果maxTokens未设置，则返回默认值4096
+     * @return 上下文大小
+     */
+    public Integer getContextSize() {
+        return maxTokens != null ? maxTokens : 4096;
+    }
 }

@@ -72,7 +72,6 @@ public class AnalyserMessageHandler extends AbstractAgentHandler {
 
         String userMessage = contextObj.getChatContext().getUserMessage();
         try {
-            // 获取流式模型客户端
             ChatLanguageModel chatLanguageModel = getStrandClient(context);
 
             // 构建请求
@@ -105,7 +104,7 @@ public class AnalyserMessageHandler extends AbstractAgentHandler {
     private <T> ChatRequest buildRequest(AgentWorkflowContext<T> context) {
         ChatContext chatContext = context.getChatContext();
         String userMessage = chatContext.getUserMessage();
-        chatContext.setUserMessage(AgentPromptTemplates.getAnalyserMessagePrompt(userMessage));
+//        chatContext.setUserMessage(AgentPromptTemplates.getAnalyserMessagePrompt(userMessage));
         return chatContext.prepareChatRequest().build();
     }
 }
