@@ -83,7 +83,7 @@ public class TaskSplitHandler extends AbstractAgentHandler {
         // 我们将在doTaskSplitting的回调中手动处理状态转换
         this.setBreak(true);
     }
-    
+
     /**
      * 执行实际的任务拆分逻辑
      */
@@ -94,14 +94,14 @@ public class TaskSplitHandler extends AbstractAgentHandler {
             StreamingChatLanguageModel streamingClient = getStreamingClient(context);
             
             // 构建任务拆分请求
-            ChatRequest splitTaskRequest = buildSplitTaskRequest(context);
+            ChatRequest chatRequest = context.getChatContext().prepareChatRequest();
+            chatRequest.messages().add(new SystemMessage(AgentPromptTemplates.getDecompositionPrompt()));
 
-            
             // 不阻塞，使用Future跟踪任务拆分完成
             CompletableFuture<Boolean> splitTaskFuture = new CompletableFuture<>();
             
             // 流式处理任务拆分响应
-            streamingClient.doChat(splitTaskRequest, new StreamingChatResponseHandler() {
+            streamingClient.doChat(chatRequest, new StreamingChatResponseHandler() {
                 StringBuilder taskSplitResult = new StringBuilder();
                 
                 @Override

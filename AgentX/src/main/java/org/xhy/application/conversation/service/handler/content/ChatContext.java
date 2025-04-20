@@ -5,6 +5,7 @@ import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.data.message.ChatMessage;
 import dev.langchain4j.data.message.SystemMessage;
 import dev.langchain4j.data.message.UserMessage;
+import dev.langchain4j.model.chat.request.ChatRequest;
 import dev.langchain4j.model.openai.OpenAiChatRequestParameters;
 import org.xhy.application.conversation.service.message.agent.template.AgentPromptTemplates;
 import org.xhy.domain.agent.model.AgentEntity;
@@ -140,7 +141,7 @@ public class ChatContext {
         this.messageHistory = messageHistory;
     }
 
-    public dev.langchain4j.model.chat.request.ChatRequest.Builder prepareChatRequest() {
+    public ChatRequest prepareChatRequest() {
         // 构建聊天消息列表
         List<ChatMessage> chatMessages = new ArrayList<>();
         dev.langchain4j.model.chat.request.ChatRequest.Builder chatRequestBuilder =
@@ -182,6 +183,6 @@ public class ChatContext {
         chatRequestBuilder.messages(chatMessages);
         chatRequestBuilder.parameters(parameters.build());
 
-        return chatRequestBuilder;
+        return chatRequestBuilder.build();
     }
 } 

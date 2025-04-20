@@ -106,6 +106,6 @@ public class AnalyserMessageHandler extends AbstractAgentHandler {
         ChatContext chatContext = context.getChatContext();
         String userMessage = chatContext.getUserMessage();
         chatContext.setUserMessage(AgentPromptTemplates.getAnalyserMessagePrompt(userMessage));
-        return chatContext.prepareChatRequest().build();
+        return chatContext.prepareChatRequest();
     }
 }
