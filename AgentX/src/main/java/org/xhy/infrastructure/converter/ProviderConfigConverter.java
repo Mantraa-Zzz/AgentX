@@ -1,16 +1,11 @@
 package org.xhy.infrastructure.converter;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import dev.langchain4j.internal.Json;
 import org.apache.ibatis.type.BaseTypeHandler;
 import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.MappedJdbcTypes;
 import org.apache.ibatis.type.MappedTypes;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.xhy.domain.llm.model.config.ProviderConfig;
-import org.xhy.infrastructure.util.JsonUtils;
+import org.xhy.infrastructure.utils.JsonUtils;
 import org.xhy.infrastructure.utils.EncryptUtils;
 
 import java.sql.CallableStatement;

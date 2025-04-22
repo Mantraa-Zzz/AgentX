@@ -2,7 +2,7 @@ package org.xhy.interfaces.dto.agent;
 
 import org.xhy.domain.agent.model.AgentModelConfig;
 import org.xhy.domain.agent.model.AgentTool;
-import org.xhy.infrastructure.util.ValidationUtils;
+import org.xhy.infrastructure.utils.ValidationUtils;
 
 import java.util.List;
 

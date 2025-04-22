@@ -3,7 +3,6 @@ package org.xhy.interfaces.dto.agent;
 import jakarta.validation.constraints.NotBlank;
 import org.xhy.domain.agent.model.AgentModelConfig;
 import org.xhy.domain.agent.model.AgentTool;
-import org.xhy.infrastructure.util.ValidationUtils;
 
 import java.util.List;
 
