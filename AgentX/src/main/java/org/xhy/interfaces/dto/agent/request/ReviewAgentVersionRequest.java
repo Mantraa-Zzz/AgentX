@@ -1,7 +1,6 @@
 package org.xhy.interfaces.dto.agent.request;
 
 import org.xhy.domain.agent.constant.PublishStatus;
-import org.xhy.infrastructure.utils.ValidationUtils;
 import org.xhy.infrastructure.exception.ParamValidationException;
 
 /**
@@ -32,7 +31,6 @@ public class ReviewAgentVersionRequest {
      * 校验请求参数
      */
     public void validate() {
-        ValidationUtils.notNull(status, "status");
 
         // 如果是拒绝，必须提供拒绝原因
         if (PublishStatus.REJECTED.equals(status) &&

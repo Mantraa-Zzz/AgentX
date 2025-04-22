@@ -165,8 +165,6 @@ public class AgentAppService {
      * 审核Agent版本
      */
     public AgentVersionDTO reviewAgentVersion(String versionId, ReviewAgentVersionRequest request) {
-        // 在应用层验证请求
-        request.validate();
 
         AgentVersionEntity agentVersionEntity = null;
         // 根据状态执行相应操作
