@@ -1,4 +1,4 @@
-package org.xhy.infrastructure.util;
+package org.xhy.infrastructure.utils;
 
 import org.xhy.infrastructure.exception.ParamValidationException;
 
