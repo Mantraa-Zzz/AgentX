@@ -1,15 +1,12 @@
 package org.xhy.infrastructure.converter;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.ibatis.type.BaseTypeHandler;
 import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.MappedJdbcTypes;
 import org.apache.ibatis.type.MappedTypes;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.xhy.domain.llm.model.config.ProviderConfig;
+import org.xhy.infrastructure.utils.EncryptUtils;
 import org.xhy.infrastructure.utils.JsonUtils;
-import org.xhy.infrastructure.utils.ValidationUtils;
 
 import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
@@ -29,7 +26,7 @@ public class ProviderConfigConverter extends BaseTypeHandler<ProviderConfig> {
     public void setNonNullParameter(PreparedStatement ps, int i, ProviderConfig parameter, JdbcType jdbcType)
             throws SQLException {
         String jsonStr = JsonUtils.toJsonString(parameter);
-        String encryptedStr = ValidationUtils.EncryptUtils.encrypt(jsonStr);
+        String encryptedStr = EncryptUtils.encrypt(jsonStr);
         ps.setString(i, encryptedStr);
     }
 
@@ -55,7 +52,7 @@ public class ProviderConfigConverter extends BaseTypeHandler<ProviderConfig> {
             return new ProviderConfig();
         }
 
-        String jsonStr = ValidationUtils.EncryptUtils.decrypt(encryptedStr);;
+        String jsonStr = EncryptUtils.decrypt(encryptedStr);;
 
         return  JsonUtils.parseObject(jsonStr,ProviderConfig.class);
 
