@@ -40,6 +40,7 @@ public class MyBatisTypeHandlerConfig {
         typeHandlerRegistry.register(ModelType.class, new ModelTypeConverter());
         typeHandlerRegistry.register(ProviderProtocol.class, new ProviderProtocolConverter());
         typeHandlerRegistry.register(Role.class, new RoleConverter());
+        typeHandlerRegistry.register(ProviderConfig.class, new ProviderConfigConverter());
 
         log.info("手动注册类型处理器：ProviderConfigConverter");
         
