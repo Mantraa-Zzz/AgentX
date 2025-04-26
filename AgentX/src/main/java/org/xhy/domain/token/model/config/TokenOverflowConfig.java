@@ -25,7 +25,7 @@ public class TokenOverflowConfig {
      * 预留缓冲比例，适用于滑动窗口策略
      * 范围0-1之间的小数，表示预留的空间比例
      */
-    private Double reserveRatio;
+    private Double reserveRatio = 0.3;
     
     /**
      * 摘要触发阈值（消息数量），适用于摘要策略

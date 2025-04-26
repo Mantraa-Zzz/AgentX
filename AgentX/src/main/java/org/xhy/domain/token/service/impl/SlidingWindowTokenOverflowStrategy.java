@@ -66,8 +66,6 @@ public class SlidingWindowTokenOverflowStrategy implements TokenOverflowStrategy
 
         // 计算可用token数（考虑预留空间）
         int maxTokens = config.getMaxTokens();
-        int reserveTokens = (int) (maxTokens * config.getReserveRatio());
-        int availableTokens = maxTokens - reserveTokens;
 
         // 保留最新的消息，直到达到token限制
         List<TokenMessage> retainedMessages = new ArrayList<>();
@@ -75,7 +73,7 @@ public class SlidingWindowTokenOverflowStrategy implements TokenOverflowStrategy
 
         for (TokenMessage message : sortedMessages) {
             int messageTokens = message.getTokenCount() != null ? message.getTokenCount() : 0;
-            if (totalTokens + messageTokens <= availableTokens) {
+            if (totalTokens + messageTokens <= maxTokens) {
                 retainedMessages.add(message);
                 totalTokens += messageTokens;
             } else {
