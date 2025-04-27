@@ -100,7 +100,7 @@ CREATE TABLE providers (
     protocol VARCHAR(50) NOT NULL,
     name VARCHAR(100) NOT NULL,
     description TEXT,
-    config JSONB,
+    config TEXT,
     is_official BOOLEAN DEFAULT FALSE,
     status BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
