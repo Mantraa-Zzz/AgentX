@@ -2,9 +2,6 @@ name: Java Code Format Check
 
 on:
   pull_request:
-    paths:
-      - 'src/**/*.java'
-      - 'pom.xml'
     branches:
       - '**'  # 对所有分支的PR都检查
 
