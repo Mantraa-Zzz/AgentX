@@ -23,7 +23,10 @@ public class AdminLLMAppService {
     public AdminLLMAppService(LLMDomainService llmDomainService) {
         this.llmDomainService = llmDomainService;
     }
-
+public AdminLLMAppService() {
+        this.llmDomainService = llmDomainService;
+    }
+    
 
     /**
      * 创建官方服务商
