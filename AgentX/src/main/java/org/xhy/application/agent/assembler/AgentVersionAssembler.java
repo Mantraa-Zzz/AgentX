@@ -1,21 +1,17 @@
 package org.xhy.application.agent.assembler;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.xhy.application.agent.dto.AgentVersionDTO;
 import org.xhy.domain.agent.model.AgentEntity;
 import org.xhy.domain.agent.model.AgentVersionEntity;
 import org.xhy.interfaces.dto.agent.request.PublishAgentVersionRequest;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
-
 public class AgentVersionAssembler {
 
-
-    /**
-     * 将AgentVersionEntity列表转换为AgentVersionDTO列表
-     */
+    /** 将AgentVersionEntity列表转换为AgentVersionDTO列表 */
     public static List<AgentVersionDTO> toVersionDTOList(List<AgentVersionEntity> entities) {
         if (entities == null) {
             return new ArrayList<>();
@@ -29,9 +25,7 @@ public class AgentVersionAssembler {
         return dtoList;
     }
 
-    /**
-     * 将AgentVersionEntity转换为AgentVersionDTO
-     */
+    /** 将AgentVersionEntity转换为AgentVersionDTO */
     public static AgentVersionDTO toDTO(AgentVersionEntity entity) {
         if (entity == null) {
             return null;
@@ -56,10 +50,7 @@ public class AgentVersionAssembler {
         return dto;
     }
 
-
-    /**
-     * 创建AgentVersionEntity
-     */
+    /** 创建AgentVersionEntity */
     public static AgentVersionEntity createVersionEntity(AgentEntity agent, PublishAgentVersionRequest request) {
         return AgentVersionEntity.createFromAgent(agent, request.getVersionNumber(), request.getChangeLog());
     }
@@ -70,5 +61,4 @@ public class AgentVersionAssembler {
         }
         return agents.stream().map(AgentVersionAssembler::toDTO).collect(Collectors.toList());
     }
-
 }

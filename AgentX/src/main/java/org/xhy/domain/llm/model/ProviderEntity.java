@@ -8,9 +8,7 @@ import org.xhy.infrastructure.entity.BaseEntity;
 import org.xhy.infrastructure.exception.BusinessException;
 import org.xhy.infrastructure.llm.protocol.enums.ProviderProtocol;
 
-/**
- * 服务提供商领域模型
- */
+/** 服务提供商领域模型 */
 @TableName("providers")
 public class ProviderEntity extends BaseEntity {
 
@@ -21,6 +19,7 @@ public class ProviderEntity extends BaseEntity {
 
     @TableField(typeHandler = ProviderProtocolConverter.class)
     private ProviderProtocol protocol;
+
     private String name;
     private String description;
 
@@ -95,7 +94,7 @@ public class ProviderEntity extends BaseEntity {
     }
 
     public void isActive() {
-        if (!status){
+        if (!status) {
             throw new BusinessException("服务商未激活");
         }
     }

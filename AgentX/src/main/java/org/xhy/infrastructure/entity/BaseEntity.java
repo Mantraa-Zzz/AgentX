@@ -3,11 +3,9 @@ package org.xhy.infrastructure.entity;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableLogic;
-
 import java.time.LocalDateTime;
 
 public class BaseEntity {
-
 
     @TableField(fill = FieldFill.INSERT)
     protected LocalDateTime createdAt;
@@ -21,12 +19,11 @@ public class BaseEntity {
     @TableField(exist = false)
     private Operator operatedBy = Operator.USER;
 
-
-    public void setAdmin(){
+    public void setAdmin() {
         this.operatedBy = Operator.ADMIN;
     }
 
-    public boolean needCheckUserId(){
+    public boolean needCheckUserId() {
         return this.operatedBy == Operator.USER;
     }
 

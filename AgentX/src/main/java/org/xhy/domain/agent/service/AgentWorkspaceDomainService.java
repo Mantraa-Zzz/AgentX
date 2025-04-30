@@ -1,19 +1,17 @@
 package org.xhy.domain.agent.service;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.xhy.domain.agent.model.AgentEntity;
 import org.xhy.domain.agent.model.AgentWorkspaceEntity;
 import org.xhy.domain.agent.repository.AgentRepository;
 import org.xhy.domain.agent.repository.AgentWorkspaceRepository;
-
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import org.xhy.infrastructure.exception.BusinessException;
 
 @Service
@@ -24,7 +22,7 @@ public class AgentWorkspaceDomainService {
     private final AgentRepository agentRepository;
 
     public AgentWorkspaceDomainService(AgentWorkspaceRepository agentWorkspaceRepository,
-                                       AgentDomainService agentServiceDomainService, AgentRepository agentRepository) {
+            AgentDomainService agentServiceDomainService, AgentRepository agentRepository) {
         this.agentWorkspaceRepository = agentWorkspaceRepository;
         this.agentRepository = agentRepository;
     }
@@ -41,16 +39,14 @@ public class AgentWorkspaceDomainService {
             return Collections.emptyList();
         }
         return agentRepository.selectByIds(agentIds);
-
     }
 
     public boolean exist(String agentId, String userId) {
-            Wrapper<AgentWorkspaceEntity> wrapper = Wrappers.<AgentWorkspaceEntity>lambdaQuery()
-                            .eq(AgentWorkspaceEntity::getAgentId, agentId)
-                            .eq(AgentWorkspaceEntity::getUserId, userId);
+        Wrapper<AgentWorkspaceEntity> wrapper = Wrappers.<AgentWorkspaceEntity>lambdaQuery()
+                .eq(AgentWorkspaceEntity::getAgentId, agentId).eq(AgentWorkspaceEntity::getUserId, userId);
 
         Long l = agentWorkspaceRepository.selectCount(wrapper);
-        return  l > 0;
+        return l > 0;
     }
 
     public boolean deleteAgent(String agentId, String userId) {
@@ -60,10 +56,9 @@ public class AgentWorkspaceDomainService {
 
     public AgentWorkspaceEntity getWorkspace(String agentId, String userId) {
         Wrapper<AgentWorkspaceEntity> wrapper = Wrappers.<AgentWorkspaceEntity>lambdaQuery()
-                .eq(AgentWorkspaceEntity::getAgentId, agentId)
-                .eq(AgentWorkspaceEntity::getUserId, userId);
+                .eq(AgentWorkspaceEntity::getAgentId, agentId).eq(AgentWorkspaceEntity::getUserId, userId);
         AgentWorkspaceEntity agentWorkspaceEntity = agentWorkspaceRepository.selectOne(wrapper);
-        if (agentWorkspaceEntity ==null){
+        if (agentWorkspaceEntity == null) {
             throw new BusinessException("助理不存在");
         }
         return agentWorkspaceEntity;
@@ -71,12 +66,11 @@ public class AgentWorkspaceDomainService {
 
     public AgentWorkspaceEntity findWorkspace(String agentId, String userId) {
         Wrapper<AgentWorkspaceEntity> wrapper = Wrappers.<AgentWorkspaceEntity>lambdaQuery()
-                .eq(AgentWorkspaceEntity::getAgentId, agentId)
-                .eq(AgentWorkspaceEntity::getUserId, userId);
+                .eq(AgentWorkspaceEntity::getAgentId, agentId).eq(AgentWorkspaceEntity::getUserId, userId);
         return agentWorkspaceRepository.selectOne(wrapper);
     }
 
-    public void save(AgentWorkspaceEntity workspace){
+    public void save(AgentWorkspaceEntity workspace) {
 
         agentWorkspaceRepository.checkInsert(workspace);
     }
@@ -85,6 +79,6 @@ public class AgentWorkspaceDomainService {
         LambdaUpdateWrapper<AgentWorkspaceEntity> wrapper = Wrappers.<AgentWorkspaceEntity>lambdaUpdate()
                 .eq(AgentWorkspaceEntity::getAgentId, workspace.getAgentId())
                 .eq(AgentWorkspaceEntity::getAgentId, workspace.getAgentId());
-        agentWorkspaceRepository.checkedUpdate(workspace,wrapper);
+        agentWorkspaceRepository.checkedUpdate(workspace, wrapper);
     }
 }

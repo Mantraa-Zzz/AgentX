@@ -1,29 +1,21 @@
 package org.xhy.infrastructure.converter;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.ibatis.type.BaseTypeHandler;
-import org.apache.ibatis.type.JdbcType;
-import org.apache.ibatis.type.MappedJdbcTypes;
-import org.apache.ibatis.type.MappedTypes;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.xhy.domain.llm.model.config.ProviderConfig;
-import org.xhy.infrastructure.utils.JsonUtils;
-import org.xhy.infrastructure.utils.ValidationUtils;
-
 import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import org.apache.ibatis.type.BaseTypeHandler;
+import org.apache.ibatis.type.JdbcType;
+import org.apache.ibatis.type.MappedJdbcTypes;
+import org.apache.ibatis.type.MappedTypes;
+import org.xhy.domain.llm.model.config.ProviderConfig;
+import org.xhy.infrastructure.utils.JsonUtils;
+import org.xhy.infrastructure.utils.ValidationUtils;
 
-/**
- * 服务商配置转换器
- * 处理加密存储的配置信息
- */
+/** 服务商配置转换器 处理加密存储的配置信息 */
 @MappedTypes(ProviderConfig.class)
 @MappedJdbcTypes({JdbcType.VARCHAR, JdbcType.LONGVARCHAR, JdbcType.OTHER})
 public class ProviderConfigConverter extends BaseTypeHandler<ProviderConfig> {
-
 
     @Override
     public void setNonNullParameter(PreparedStatement ps, int i, ProviderConfig parameter, JdbcType jdbcType)
@@ -57,7 +49,6 @@ public class ProviderConfigConverter extends BaseTypeHandler<ProviderConfig> {
 
         String jsonStr = ValidationUtils.EncryptUtils.decrypt(encryptedStr);;
 
-        return  JsonUtils.parseObject(jsonStr,ProviderConfig.class);
-
+        return JsonUtils.parseObject(jsonStr, ProviderConfig.class);
     }
 }
