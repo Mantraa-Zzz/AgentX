@@ -1,11 +1,13 @@
 package org.xhy.application.agent.dto;
 
+import org.xhy.domain.agent.constant.AgentType;
+import org.xhy.domain.agent.model.LLMModelConfig;
+import org.xhy.domain.agent.model.AgentTool;
+import org.xhy.domain.agent.constant.PublishStatus;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import org.xhy.domain.agent.constant.AgentType;
-import org.xhy.domain.agent.constant.PublishStatus;
-import org.xhy.domain.agent.model.AgentTool;
 
 /** Agent版本数据传输对象，用于表示层和应用层之间传递Agent版本数据 */
 public class AgentVersionDTO {
@@ -60,6 +62,9 @@ public class AgentVersionDTO {
 
     /** 创建者用户ID */
     private String userId;
+
+    /** 是否已添加到工作区 */
+    private Boolean isAddWorkspace;
 
     /** 创建时间 */
     private LocalDateTime createdAt;
@@ -254,5 +259,13 @@ public class AgentVersionDTO {
     /** 是否已下架状态 */
     public boolean isRemoved() {
         return PublishStatus.REMOVED.getCode().equals(publishStatus);
+    }
+
+    public Boolean getAddWorkspace() {
+        return isAddWorkspace;
+    }
+
+    public void setAddWorkspace(Boolean addWorkspace) {
+        isAddWorkspace = addWorkspace;
     }
 }
