@@ -1,14 +1,14 @@
 package org.xhy.application.agent.service;
 
-import java.util.List;
-import java.util.stream.Collectors;
 import org.springframework.boot.autoconfigure.info.ProjectInfoProperties;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.xhy.application.agent.assembler.AgentAssembler;
 import org.xhy.application.agent.assembler.AgentWorkspaceAssembler;
 import org.xhy.application.agent.dto.AgentDTO;
+import org.xhy.domain.agent.constant.PublishStatus;
 import org.xhy.domain.agent.model.AgentEntity;
+import org.xhy.domain.agent.model.AgentVersionEntity;
 import org.xhy.domain.agent.model.AgentWorkspaceEntity;
 import org.xhy.domain.agent.model.LLMModelConfig;
 import org.xhy.domain.agent.service.AgentDomainService;
@@ -22,6 +22,9 @@ import org.xhy.domain.llm.service.LLMDomainService;
 import org.xhy.infrastructure.exception.BusinessException;
 import org.xhy.interfaces.dto.agent.request.UpdateModelConfigRequest;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 /** Agent应用服务，用于适配领域层的Agent服务 职责： 1. 接收和验证来自接口层的请求 2. 将请求转换为领域对象或参数 3. 调用领域服务执行业务逻辑 4. 转换和返回结果给接口层 */
 @Service
 public class AgentWorkspaceAppService {
@@ -34,7 +37,6 @@ public class AgentWorkspaceAppService {
 
     private final ConversationDomainService conversationDomainService;
     private final LLMDomainService llmDomainService;
-    private final ProjectInfoProperties projectInfoProperties;
 
     public AgentWorkspaceAppService(AgentWorkspaceDomainService agentWorkspaceDomainService,
             AgentDomainService agentServiceDomainService, SessionDomainService sessionDomainService,
@@ -45,11 +47,10 @@ public class AgentWorkspaceAppService {
         this.sessionDomainService = sessionDomainService;
         this.conversationDomainService = conversationDomainService;
         this.llmDomainService = llmDomainService;
-        this.projectInfoProperties = projectInfoProperties;
     }
 
     /** 获取工作区下的助理
-     *
+     * 
      * @param userId 用户id
      * @return AgentDTO */
     public List<AgentDTO> getAgents(String userId) {
@@ -58,7 +59,6 @@ public class AgentWorkspaceAppService {
     }
 
     /** 删除工作区中的助理
-     *
      * @param agentId 助理id
      * @param userId 用户id */
     @Transactional
@@ -88,7 +88,6 @@ public class AgentWorkspaceAppService {
     }
 
     /** 保存agent的模型配置
-     *
      * @param agentId agent ID
      * @param userId 用户ID
      * @param request 模型配置 */
@@ -102,5 +101,25 @@ public class AgentWorkspaceAppService {
         ProviderEntity provider = llmDomainService.getProvider(model.getProviderId());
         provider.isActive();
         agentWorkspaceDomainService.update(new AgentWorkspaceEntity(agentId, userId, llmModelConfig));
+    }
+
+    // 添加到工作区
+    public void addAgent(String agentId, String userId) {
+        AgentEntity agent = agentServiceDomainService.getAgentById(agentId);
+        if (agent.getUserId().equals(userId)) {
+            throw new BusinessException("不可添加自己的助理");
+        }
+        if (agentWorkspaceDomainService.exist(agentId, userId)) {
+            throw new BusinessException("不可重复添加助理");
+        }
+
+        agent.isEnable();
+        String publishedVersion = agent.getPublishedVersion();
+        AgentVersionEntity agentVersionEntity = agentServiceDomainService.getAgentVersionById(publishedVersion);
+        if (!agentVersionEntity.getPublishStatusEnum().equals(PublishStatus.PUBLISHED)) {
+            throw new BusinessException("助理未发布");
+        }
+
+        agentWorkspaceDomainService.save(new AgentWorkspaceEntity(agentId, userId, new LLMModelConfig()));
     }
 }
