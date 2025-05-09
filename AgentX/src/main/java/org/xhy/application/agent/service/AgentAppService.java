@@ -17,6 +17,7 @@ import org.xhy.infrastructure.exception.ParamValidationException;
 import org.xhy.domain.agent.constant.PublishStatus;
 import org.xhy.interfaces.dto.agent.request.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -59,13 +60,14 @@ public class AgentAppService {
         AgentEntity entity = AgentAssembler.toEntity(searchAgentsRequest);
         List<AgentEntity> agents = agentServiceDomainService.getUserAgents(userId, entity);
         return AgentAssembler.toDTOs(agents);
-    }
+    }/** 获取已上架的Agent列表，支持名称搜索 */
 
-    /** 获取已上架的Agent列表，支持名称搜索 */
     public List<AgentVersionDTO> getPublishedAgentsByName(SearchAgentsRequest searchAgentsRequest, String userId) {
         AgentEntity entity = AgentAssembler.toEntity(searchAgentsRequest);
         List<AgentVersionEntity> agentVersionEntities = agentServiceDomainService.getPublishedAgentsByName(entity);
-
+        if (agentVersionEntities.isEmpty()) {
+            return new ArrayList<>();
+        }
         List<String> agentIds = agentVersionEntities.stream().map(AgentVersionEntity::getAgentId).toList();
         List<AgentWorkspaceEntity> agentWorkspaceEntities = agentWorkspaceDomainService.listAgents(agentIds, userId);
         Set<String> agentIdsSet = agentWorkspaceEntities.stream().map(AgentWorkspaceEntity::getAgentId)
