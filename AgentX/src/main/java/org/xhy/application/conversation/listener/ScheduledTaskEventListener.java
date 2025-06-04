@@ -1,4 +1,4 @@
-package org.xhy.application.scheduledtask.listener;
+package org.xhy.application.conversation.listener;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,12 +17,9 @@ public class ScheduledTaskEventListener {
     private static final Logger logger = LoggerFactory.getLogger(ScheduledTaskEventListener.class);
 
     private final ConversationAppService conversationAppService;
-    private final ScheduledTaskDomainService scheduledTaskDomainService;
 
-    public ScheduledTaskEventListener(ConversationAppService conversationAppService,
-            ScheduledTaskDomainService scheduledTaskDomainService) {
+    public ScheduledTaskEventListener(ConversationAppService conversationAppService) {
         this.conversationAppService = conversationAppService;
-        this.scheduledTaskDomainService = scheduledTaskDomainService;
     }
 
     /** 处理定时任务执行事件
