@@ -44,14 +44,9 @@ public class ScheduledTaskEventListener {
 
             logger.info("定时任务消息发送成功: taskId={}", event.getTaskId());
 
-            // 直接调用Domain服务记录执行成功（如果需要的话）
-            // scheduledTaskDomainService.recordExecutionSuccess(event.getTaskId());
-
         } catch (Exception e) {
             logger.error("处理定时任务执行事件失败: taskId={}, error={}", event.getTaskId(), e.getMessage(), e);
 
-            // 直接调用Domain服务记录执行失败（如果需要的话）
-            // scheduledTaskDomainService.recordExecutionFailure(event.getTaskId(), e.getMessage());
         }
     }
 }
