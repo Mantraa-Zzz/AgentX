@@ -4,6 +4,7 @@ import { withToast } from "./toast-utils"
 import { toast } from "@/hooks/use-toast"
 import { httpClient } from "@/lib/http-client"
 
+
 // 会话类型定义
 export interface SessionDTO {
   id: string
@@ -120,3 +121,40 @@ export const deleteAgentSessionWithToast = withToast(deleteAgentSession, {
   errorTitle: "删除助理会话失败"
 })
 
+/**
+ * 中断指定会话的对话
+ * @param sessionId 会话ID
+ */
+export async function interruptSession(sessionId: string): Promise<void> {
+  const response = await fetch(`${API_CONFIG.BASE_URL}/agent/session/interrupt/${sessionId}`, {
+    method: 'POST',
+    headers: getAuthHeaders()
+  })
+
+  if (!response.ok) {
+    const error = await response.json()
+    if (error.code === 401) {
+      localStorage.removeItem("auth_token")
+      window.location.href = "/login"
+    }
+  }
+}
+
+
+function getAuthHeaders(): HeadersInit {
+  const headers: HeadersInit = {
+    "Content-Type": "application/json",
+    Accept: "*/*",
+    Connection: "keep-alive",
+  }
+
+  // 添加认证令牌
+  if (typeof window !== "undefined") {
+    const token = localStorage.getItem("auth_token")
+    if (token) {
+      headers.Authorization = `Bearer ${token}`
+    }
+  }
+
+  return headers
+}

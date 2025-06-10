@@ -9,6 +9,7 @@ export interface AgentPreviewRequest {
   messageHistory?: MessageHistoryItem[]
   modelId?: string // 可选，不传则使用用户默认模型
   fileUrls?: string[] // 新增：文件URL列表
+  sessionId: string // 新增: 会话ID
 }
 
 // 消息历史项

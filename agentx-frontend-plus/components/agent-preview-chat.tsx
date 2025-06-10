@@ -10,6 +10,10 @@ import { Loader2, MessageCircle, Send, Bot, User, AlertCircle, Paperclip, X } fr
 import { toast } from '@/hooks/use-toast'
 import { previewAgent, type AgentPreviewRequest, type MessageHistoryItem } from '@/lib/agent-preview-service'
 import { uploadMultipleFiles, type UploadResult, type UploadFileInfo } from '@/lib/file-upload-service'
+import { interruptSession } from '@/lib/agent-session-service'
+
+// 固定的预览会话ID
+const PREVIEW_SESSION_ID = 'preview-session'
 
 // 文件类型 - 使用URL而不是base64内容
 interface ChatFile {
@@ -68,10 +72,12 @@ export default function AgentPreviewChat({
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [inputValue, setInputValue] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [isTyping, setIsTyping] = useState(false)
   const [isThinking, setIsThinking] = useState(false)
   const [streamingMessageId, setStreamingMessageId] = useState<string | null>(null)
   const [uploadedFiles, setUploadedFiles] = useState<ChatFile[]>([]) // 新增：待发送的文件列表
   const [isUploadingFiles, setIsUploadingFiles] = useState(false) // 新增：文件上传状态
+  const [isInterruptible, setIsInterruptible] = useState(false) // 新增: 是否可以中断的状态
   const scrollAreaRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null) // 新增：文件输入引用
@@ -97,6 +103,33 @@ export default function AgentPreviewChat({
       }
     }
   }, [messages, isThinking])
+
+  // 处理中断
+  const handleInterrupt = async () => {
+    try {
+      await interruptSession(PREVIEW_SESSION_ID)
+      setIsInterruptible(false)
+      setIsLoading(false)
+      setIsThinking(false)
+      setStreamingMessageId(null)
+      
+      // 更新被中断的消息
+      if (streamingMessageId) {
+        setMessages(prev => prev.map(msg => 
+          msg.id === streamingMessageId
+            ? { ...msg, content: msg.content + "\n[对话已中断]", isStreaming: false }
+            : msg
+        ))
+      }
+    } catch (error) {
+      console.error('Failed to interrupt session:', error)
+      toast({
+        title: "中断失败",
+        description: error instanceof Error ? error.message : "未知错误",
+        variant: "destructive"
+      })
+    }
+  }
 
   // 发送消息
   const sendMessage = async () => {
@@ -126,8 +159,11 @@ export default function AgentPreviewChat({
     setUploadedFiles([]) // 清空已上传的文件
     setIsLoading(true)
     setIsThinking(true) // 设置思考状态
+    setIsTyping(true)
 
     try {
+      setIsInterruptible(true) // 设置可中断状态
+
       // 构建消息历史 - 包含文件URL信息
       const messageHistory: MessageHistoryItem[] = messages
         .filter(msg => msg.id !== 'welcome') // 排除欢迎消息
@@ -147,7 +183,8 @@ export default function AgentPreviewChat({
         toolPresetParams,
         messageHistory,
         modelId,
-        fileUrls: fileUrls.length > 0 ? fileUrls : undefined // 当前消息的文件URL
+        fileUrls: fileUrls.length > 0 ? fileUrls : undefined, // 当前消息的文件URL
+        sessionId: PREVIEW_SESSION_ID // 添加固定的会话ID
       }
 
       // 输出完整请求到控制台
@@ -162,7 +199,10 @@ export default function AgentPreviewChat({
 
       // 发送预览请求
       await previewAgent(
-        previewRequest,
+        {
+          ...previewRequest,
+          sessionId: PREVIEW_SESSION_ID // 添加固定的会话ID
+        },
         // 流式消息处理
         (content: string) => {
           console.log('Received streaming content:', content);
@@ -203,9 +243,10 @@ export default function AgentPreviewChat({
                 : msg
             ))
           }
-          setStreamingMessageId(null)
-          setIsLoading(false)
-          setIsThinking(false)
+          setStreamingMessageId(null);
+          setIsLoading(false);
+          setIsThinking(false);
+          setIsInterruptible(false); // 完成时重置中断状态
         },
         // 错误处理
         (error: Error) => {
@@ -236,29 +277,32 @@ export default function AgentPreviewChat({
             ))
           }
           
-          setStreamingMessageId(null)
-          setIsLoading(false)
+          setStreamingMessageId(null);
+          setIsLoading(false);
+          setIsThinking(false);
+          setIsInterruptible(false); // 错误时重置中断状态
           
           toast({
             title: "预览失败",
             description: error.message,
             variant: "destructive"
-          })
+          });
         }
-      )
+      );
     } catch (error) {
-      console.error('Preview request failed:', error)
-      setStreamingMessageId(null)
-      setIsLoading(false)
-      setIsThinking(false)
+      console.error('Preview request failed:', error);
+      setStreamingMessageId(null);
+      setIsLoading(false);
+      setIsThinking(false);
+      setIsInterruptible(false); // 异常时重置中断状态
       
       toast({
         title: "预览失败", 
         description: error instanceof Error ? error.message : "未知错误",
         variant: "destructive"
-      })
+      });
     }
-  }
+  };
 
   // 处理按键事件
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -646,17 +690,30 @@ export default function AgentPreviewChat({
             disabled={disabled || isLoading}
             className="flex-1"
           />
-          <Button
-            onClick={sendMessage}
-            disabled={disabled || isLoading || (!inputValue.trim() && uploadedFiles.length === 0)}
-            size="icon"
-          >
-            {isLoading ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Send className="h-4 w-4" />
-            )}
-          </Button>
+
+          {isLoading && isInterruptible ? (
+            <Button 
+              variant="ghost"
+              size="icon"
+              className="h-10 w-10 rounded-xl text-gray-500 hover:text-red-500 border border-gray-200"
+              onClick={handleInterrupt}
+              disabled={disabled}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          ) : (
+            <Button 
+              onClick={sendMessage} 
+              disabled={disabled || (isLoading && !isInterruptible) || (!inputValue.trim() && uploadedFiles.length === 0)}
+              className="h-10 w-10 rounded-xl bg-blue-500 hover:bg-blue-600 shadow-sm"
+            >
+              {isLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Send className="h-4 w-4" />
+              )}
+            </Button>
+          )}
         </div>
 
         {/* 隐藏的文件输入 */}
