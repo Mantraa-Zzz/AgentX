@@ -534,6 +534,25 @@ if ! command -v docker-compose &> /dev/null && ! docker compose version &> /dev/
     exit 1
 fi
 
+# 配置Docker国内镜像源
+echo -e "${BLUE}🐳 配置 Docker 国内镜像源...${NC}"
+if [ -f "$PROJECT_ROOT/bin/setup-docker-mirrors.sh" ]; then
+    read -p "是否配置 Docker 国内镜像源以加速镜像拉取? [Y/n]: " -n 1 -r
+    echo
+    if [[ ! $REPLY =~ ^[Nn]$ ]]; then
+        "$PROJECT_ROOT/bin/setup-docker-mirrors.sh"
+        if [ $? -eq 0 ]; then
+            echo -e "${GREEN}✅ Docker 镜像源配置完成${NC}"
+        else
+            echo -e "${YELLOW}⚠️  Docker 镜像源配置失败，继续使用默认源${NC}"
+        fi
+    else
+        echo -e "${YELLOW}⏭️  跳过 Docker 镜像源配置${NC}"
+    fi
+else
+    echo -e "${YELLOW}⚠️  未找到 Docker 镜像源配置脚本${NC}"
+fi
+
 # 创建日志目录
 mkdir -p logs/backend logs/gateway logs/frontend
 
