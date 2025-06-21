@@ -1,0 +1,59 @@
+version: "3.8"
+
+services:
+  # AgentX后端服务
+  agentx-backend:
+    build:
+      context: ./AgentX
+      dockerfile: Dockerfile
+    container_name: agentx-backend
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - DB_HOST=1
+      - DB_PORT=5432
+      - DB_NAME=agentx
+      - DB_USERNAME=
+      - DB_PASSWORD=
+      - MCP_GATEWAY_URL=http://mcp-gateway:8080
+    depends_on:
+      mcp-gateway:
+        condition: service_started
+    volumes:
+      - ./logs/backend:/app/logs
+    networks:
+      - agentx-network
+    restart: unless-stopped
+
+  # AgentX前端服务
+  agentx-frontend:
+    build:
+      context: ./agentx-frontend-plus
+      dockerfile: Dockerfile
+    container_name: agentx-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=http://localhost:8080
+    depends_on:
+      - agentx-backend
+    networks:
+      - agentx-network
+    restart: unless-stopped
+
+  # MCP网关服务
+  mcp-gateway:
+    image: ghcr.io/lucky-aeon/mcp-gateway:latest
+    container_name: agentx-mcp-gateway
+    ports:
+      - "8005:8080"
+    networks:
+      - agentx-network
+    restart: unless-stopped
+
+networks:
+  agentx-network:
+    driver: bridge
+    name: agentx-network

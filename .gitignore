@@ -159,3 +159,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Claude Code 配置文件
+.claude/
+CLAUDE.md
