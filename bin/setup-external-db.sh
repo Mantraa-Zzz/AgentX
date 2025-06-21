@@ -95,6 +95,7 @@ DB_USER=${DB_USER:-agentx_user}
 
 read -s -p "AgentX数据库用户密码: " DB_PASSWORD
 echo
+fi
 
 echo
 echo -e "${BLUE}📋 配置总结:${NC}"
