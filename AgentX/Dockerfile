@@ -1,5 +1,5 @@
-# 使用国内阿里云镜像源
-FROM registry.cn-hangzhou.aliyuncs.com/library/openjdk:17-jdk-slim
+# 使用官方OpenJDK镜像（通过配置的镜像源加速）
+FROM openjdk:17-jdk-slim
 
 WORKDIR /app
 

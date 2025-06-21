@@ -1,9 +1,9 @@
 {
   "registry-mirrors": [
-    "https://registry.cn-hangzhou.aliyuncs.com",
     "https://docker.mirrors.ustc.edu.cn",
     "https://hub-mirror.c.163.com",
-    "https://mirror.baidubce.com"
+    "https://mirror.baidubce.com",
+    "https://dockerproxy.com"
   ],
   "dns": ["8.8.8.8", "114.114.114.114"],
   "insecure-registries": [],

@@ -1,5 +1,5 @@
-# 多阶段构建：第一阶段 - 构建应用
-FROM registry.cn-hangzhou.aliyuncs.com/library/maven:3.9.6-eclipse-temurin-17 AS builder
+# 多阶段构建：第一阶段 - 构建应用（使用官方镜像，通过镜像源加速）
+FROM maven:3.9.6-eclipse-temurin-17 AS builder
 
 # 设置工作目录
 WORKDIR /build
@@ -30,8 +30,8 @@ COPY src ./src
 # 构建应用（跳过测试，只有源码变化时才重新构建）
 RUN mvn clean package -DskipTests -B -q
 
-# 多阶段构建：第二阶段 - 运行时镜像
-FROM registry.cn-hangzhou.aliyuncs.com/library/openjdk:17-jdk-slim
+# 多阶段构建：第二阶段 - 运行时镜像（使用官方镜像，通过镜像源加速）
+FROM openjdk:17-jdk-slim
 
 # 设置工作目录
 WORKDIR /app

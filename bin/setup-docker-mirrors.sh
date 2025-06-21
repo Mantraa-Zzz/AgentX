@@ -78,7 +78,7 @@ fi
 
 # 验证配置
 echo -e "${BLUE}🧪 验证镜像源配置...${NC}"
-if docker info | grep -A 10 "Registry Mirrors" | grep -q "registry.cn-hangzhou.aliyuncs.com"; then
+if docker info | grep -A 10 "Registry Mirrors" | grep -q "docker.mirrors.ustc.edu.cn"; then
     echo -e "${GREEN}✅ 国内镜像源配置成功${NC}"
     
     echo -e "${BLUE}📊 当前配置的镜像源:${NC}"
@@ -112,8 +112,8 @@ echo -e "${NC}"
 
 echo -e "${BLUE}📋 配置信息:${NC}"
 echo "  - 配置文件: $DOCKER_CONFIG_FILE"
-echo "  - 主镜像源: registry.cn-hangzhou.aliyuncs.com"
-echo "  - 备用镜像源: docker.mirrors.ustc.edu.cn"
+echo "  - 主镜像源: docker.mirrors.ustc.edu.cn"
+echo "  - 备用镜像源: hub-mirror.c.163.com"
 echo
 
 echo -e "${BLUE}💡 使用建议:${NC}"
