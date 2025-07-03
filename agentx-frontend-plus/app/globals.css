@@ -80,3 +80,103 @@
   }
 }
 
+/* Markdown样式优化 */
+@layer components {
+  .prose {
+    --tw-prose-body: theme(colors.gray.700);
+    --tw-prose-headings: theme(colors.gray.900);
+    --tw-prose-lead: theme(colors.gray.600);
+    --tw-prose-links: theme(colors.blue.600);
+    --tw-prose-bold: theme(colors.gray.900);
+    --tw-prose-counters: theme(colors.gray.500);
+    --tw-prose-bullets: theme(colors.gray.300);
+    --tw-prose-hr: theme(colors.gray.200);
+    --tw-prose-quotes: theme(colors.gray.900);
+    --tw-prose-quote-borders: theme(colors.gray.200);
+    --tw-prose-captions: theme(colors.gray.500);
+    --tw-prose-code: theme(colors.gray.900);
+    --tw-prose-pre-code: theme(colors.gray.200);
+    --tw-prose-pre-bg: theme(colors.gray.800);
+    --tw-prose-th-borders: theme(colors.gray.300);
+    --tw-prose-td-borders: theme(colors.gray.200);
+  }
+
+  .dark .prose {
+    --tw-prose-body: theme(colors.gray.300);
+    --tw-prose-headings: theme(colors.gray.100);
+    --tw-prose-lead: theme(colors.gray.400);
+    --tw-prose-links: theme(colors.blue.400);
+    --tw-prose-bold: theme(colors.gray.100);
+    --tw-prose-counters: theme(colors.gray.400);
+    --tw-prose-bullets: theme(colors.gray.600);
+    --tw-prose-hr: theme(colors.gray.700);
+    --tw-prose-quotes: theme(colors.gray.100);
+    --tw-prose-quote-borders: theme(colors.gray.700);
+    --tw-prose-captions: theme(colors.gray.400);
+    --tw-prose-code: theme(colors.gray.100);
+    --tw-prose-pre-code: theme(colors.gray.300);
+    --tw-prose-pre-bg: theme(colors.gray.900);
+    --tw-prose-th-borders: theme(colors.gray.600);
+    --tw-prose-td-borders: theme(colors.gray.700);
+  }
+
+  /* 聊天消息中的markdown样式 */
+  .prose ul, .prose ol {
+    @apply my-2;
+  }
+
+  .prose li {
+    @apply my-0.5;
+  }
+
+  .prose p {
+    @apply my-1;
+  }
+
+  .prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
+    @apply font-semibold;
+  }
+
+  .prose h1:first-child, 
+  .prose h2:first-child, 
+  .prose h3:first-child, 
+  .prose h4:first-child, 
+  .prose h5:first-child, 
+  .prose h6:first-child {
+    @apply mt-0;
+  }
+
+  .prose p:last-child {
+    @apply mb-0;
+  }
+
+  .prose ul:last-child, 
+  .prose ol:last-child {
+    @apply mb-0;
+  }
+
+  /* 优化代码块在prose中的显示 */
+  .prose .code-block-container {
+    @apply -mx-2 my-3;
+  }
+
+  .prose pre {
+    @apply text-sm leading-relaxed;
+  }
+
+  /* 优化内联代码 */
+  .prose :not(pre) > code {
+    @apply font-mono text-sm bg-gray-100 dark:bg-gray-800 px-1 py-0.5 rounded;
+  }
+
+  /* 优化表格在聊天中的显示 */
+  .prose table {
+    @apply text-sm;
+  }
+
+  /* 优化引用块 */
+  .prose blockquote {
+    @apply text-sm;
+  }
+}
+

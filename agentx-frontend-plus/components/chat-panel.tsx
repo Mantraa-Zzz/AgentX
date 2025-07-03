@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useRef, useEffect, useCallback } from "react"
-import { Send, Wrench, Clock } from 'lucide-react'
+import { Send, Wrench, Clock, Copy, Check } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -71,6 +71,7 @@ export function ChatPanel({ conversationId, isFunctionalAgent = false, agentName
   const [isThinking, setIsThinking] = useState(false)
   const [currentAssistantMessage, setCurrentAssistantMessage] = useState<AssistantMessage | null>(null)
   const [uploadedFiles, setUploadedFiles] = useState<ChatFile[]>([]) // 新增：已上传的文件列表
+  const [copiedCodeBlocks, setCopiedCodeBlocks] = useState<Set<string>>(new Set()) // 记录已复制的代码块
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const chatContainerRef = useRef<HTMLDivElement>(null)
   
@@ -527,68 +528,119 @@ export function ChatPanel({ conversationId, isFunctionalAgent = false, agentName
     }
   };
 
+  // 复制代码块内容
+  const handleCopyCode = async (code: string, codeBlockId: string) => {
+    try {
+      await navigator.clipboard.writeText(code);
+      setCopiedCodeBlocks(prev => new Set(prev).add(codeBlockId));
+      
+      // 显示成功提示
+      toast({
+        title: "复制成功",
+        description: "代码已复制到剪贴板",
+        variant: "default",
+      });
+      
+      // 3秒后重置复制状态
+      setTimeout(() => {
+        setCopiedCodeBlocks(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(codeBlockId);
+          return newSet;
+        });
+      }, 3000);
+    } catch (error) {
+      toast({
+        title: "复制失败",
+        description: "无法复制到剪贴板",
+        variant: "destructive",
+      });
+    }
+  };
+
   // 渲染消息内容
   const renderMessageContent = (message: MessageInterface) => {
     return (
-      <div className="react-markdown">
+      <div className="prose prose-sm max-w-none prose-gray">
         <ReactMarkdown
           remarkPlugins={[remarkGfm]}
           components={{
-            // 代码块渲染
+            // 只保留代码块的语法高亮渲染，其他完全按照后端markdown格式
             code({ inline, className, children, ...props }: any) {
               const match = /language-(\w+)/.exec(className || "");
+              const codeContent = String(children).replace(/\n$/, "");
+              
               return !inline && match ? (
                 <Highlight
                   theme={themes.vsDark}
-                  code={String(children).replace(/\n$/, "")}
+                  code={codeContent}
                   language={match[1]}
                 >
-                  {({ className, style, tokens, getLineProps, getTokenProps }) => (
-                    <div className="code-block-container">
-                      <pre
-                        className={`${className} rounded p-2 my-2 overflow-x-auto max-w-full text-sm`}
-                        style={{...style, wordBreak: 'break-all', overflowWrap: 'break-word'}}
-                      >
-                        {tokens.map((line, i) => {
-                          // 获取line props但不通过展开操作符传递key
-                          const lineProps = getLineProps({ line, key: i });
-                          return (
-                            <div 
-                              key={i} 
-                              className={lineProps.className}
-                              style={{
-                                ...lineProps.style,
-                                whiteSpace: 'pre-wrap', 
-                                wordBreak: 'break-all'
-                              }}
-                            >
-                              <span className="text-gray-500 mr-2 text-right w-6 inline-block select-none">
-                                {i + 1}
-                              </span>
-                              {line.map((token, tokenIndex) => {
-                                // 获取token props但不包含key
-                                const tokenProps = getTokenProps({ token, key: tokenIndex });
-                                // 删除key属性，使用单独的key属性
-                                return <span 
-                                  key={tokenIndex} 
-                                  className={tokenProps.className}
-                                  style={{
-                                    ...tokenProps.style,
-                                    wordBreak: 'break-all',
-                                    overflowWrap: 'break-word'
-                                  }}
-                                  children={tokenProps.children}
-                                />;
-                              })}
-                            </div>
-                          );
-                        })}
-                      </pre>
-                    </div>
-                  )}
+                  {({ className, style, tokens, getLineProps, getTokenProps }) => {
+                    // 为每个代码块生成唯一ID
+                    const codeBlockId = `${message.id}-${codeContent.slice(0, 20).replace(/\s/g, '')}-${match[1]}`;
+                    const isCopied = copiedCodeBlocks.has(codeBlockId);
+                    
+                    return (
+                      <div className="code-block-container not-prose relative">
+                        {/* 复制按钮 */}
+                        <button
+                          onClick={() => handleCopyCode(codeContent, codeBlockId)}
+                          className="absolute top-2 right-2 p-1.5 rounded bg-gray-600/80 hover:bg-gray-500 text-gray-300 hover:text-white transition-all duration-200 backdrop-blur-sm"
+                          title={isCopied ? "已复制" : "复制代码"}
+                        >
+                          {isCopied ? (
+                            <Check className="h-4 w-4 text-green-400" />
+                          ) : (
+                            <Copy className="h-4 w-4" />
+                          )}
+                        </button>
+                        
+                        <pre
+                          className={`${className} rounded p-2 my-2 overflow-x-auto max-w-full text-sm`}
+                          style={{...style, wordBreak: 'break-all', overflowWrap: 'break-word'}}
+                        >
+                          {tokens.map((line, i) => {
+                            // 获取line props但不通过展开操作符传递key
+                            const lineProps = getLineProps({ line, key: i });
+                            return (
+                              <div 
+                                key={i} 
+                                className={lineProps.className}
+                                style={{
+                                  ...lineProps.style,
+                                  whiteSpace: 'pre-wrap', 
+                                  wordBreak: 'break-all'
+                                }}
+                              >
+                                <span className="text-gray-500 mr-2 text-right w-6 inline-block select-none">
+                                  {i + 1}
+                                </span>
+                                {line.map((token, tokenIndex) => {
+                                  // 获取token props但不包含key
+                                  const tokenProps = getTokenProps({ token, key: tokenIndex });
+                                  // 删除key属性，使用单独的key属性
+                                  return <span 
+                                    key={tokenIndex} 
+                                    className={tokenProps.className}
+                                    style={{
+                                      ...tokenProps.style,
+                                      wordBreak: 'break-all',
+                                      overflowWrap: 'break-word'
+                                    }}
+                                    children={tokenProps.children}
+                                  />;
+                                })}
+                              </div>
+                            );
+                          })}
+                        </pre>
+                      </div>
+                    );
+                  }}
                 </Highlight>
               ) : (
-                <code className={`${className} bg-gray-100 px-1 py-0.5 rounded break-all`} {...props}>
+                <code className={`${className} bg-gray-100 dark:bg-gray-800 px-1 py-0.5 rounded break-all`} {...props}>
                   {children}
                 </code>
               );
