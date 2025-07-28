@@ -10,6 +10,8 @@ import org.xhy.domain.llm.service.HighAvailabilityDomainService;
 import org.xhy.domain.llm.service.LLMDomainService;
 import org.xhy.domain.user.service.UserSettingsDomainService;
 import org.xhy.infrastructure.llm.LLMServiceFactory;
+import org.xhy.application.billing.service.BillingService;
+import org.xhy.domain.user.service.AccountDomainService;
 
 /** Agent消息处理器 用于支持工具调用的对话模式 实现任务拆分、执行和结果汇总的工作流 使用事件驱动架构进行状态转换 */
 @Component(value = "agentMessageHandler")
@@ -25,16 +27,15 @@ public class AgentMessageHandler extends AbstractMessageHandler {
     public AgentMessageHandler(LLMServiceFactory llmServiceFactory, MessageDomainService messageDomainService,
             HighAvailabilityDomainService highAvailabilityDomainService, SessionDomainService sessionDomainService,
             UserSettingsDomainService userSettingsDomainService, LLMDomainService llmDomainService,
-            AgentToolManager agentToolManager, HighAvailabilityDomainService highAvailabilityDomainService1,
-            SessionDomainService sessionDomainService1, UserSettingsDomainService userSettingsDomainService1,
-            LLMDomainService llmDomainService1) {
+            BillingService billingService, AccountDomainService accountDomainService,
+            AgentToolManager agentToolManager) {
         super(llmServiceFactory, messageDomainService, highAvailabilityDomainService, sessionDomainService,
-                userSettingsDomainService, llmDomainService);
+                userSettingsDomainService, llmDomainService, billingService, accountDomainService);
         this.agentToolManager = agentToolManager;
-        this.highAvailabilityDomainService = highAvailabilityDomainService1;
-        this.sessionDomainService = sessionDomainService1;
-        this.userSettingsDomainService = userSettingsDomainService1;
-        this.llmDomainService = llmDomainService1;
+        this.highAvailabilityDomainService = highAvailabilityDomainService;
+        this.sessionDomainService = sessionDomainService;
+        this.userSettingsDomainService = userSettingsDomainService;
+        this.llmDomainService = llmDomainService;
     }
 
     @Override
