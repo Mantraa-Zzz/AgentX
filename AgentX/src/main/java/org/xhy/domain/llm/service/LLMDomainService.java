@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /** LLM领域服务 负责服务提供商和模型的核心业务逻辑 */
@@ -357,6 +358,19 @@ public class LLMDomainService {
      * @return 所有激活的模型列表 */
     public List<ModelEntity> getAllActiveModels() {
         Wrapper<ModelEntity> wrapper = Wrappers.<ModelEntity>lambdaQuery().eq(ModelEntity::getStatus, true);
+        return modelRepository.selectList(wrapper);
+    }
+
+    /** 批量获取模型信息
+     * @param modelIds 模型ID集合
+     * @return 模型列表 */
+    public List<ModelEntity> getModelsByIds(Set<String> modelIds) {
+        if (modelIds == null || modelIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+        
+        Wrapper<ModelEntity> wrapper = Wrappers.<ModelEntity>lambdaQuery()
+                .in(ModelEntity::getId, modelIds);
         return modelRepository.selectList(wrapper);
     }
 
