@@ -101,3 +101,11 @@ s3:
   path-style-access: ${S3_PATH_STYLE_ACCESS:false}
   # 文件访问URL前缀
   url-prefix: ${S3_URL_PREFIX:}
+payment:
+  alipay:
+    app-id: ${ALIPAY_APP_ID}
+    private-key: ${ALIPAY_PRIVATE_KEY}
+    public-key: ${ALIPAY_PUBLIC_KEY}
+  stripe:
+    secret-key: ${STRIPE_SECRET_KEY}
+    publishable-key: ${STRIPE_PUBLISHABLE_KEY}
