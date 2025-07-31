@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
+import org.xhy.domain.order.constant.OrderStatus;
 import org.xhy.domain.order.constant.PaymentPlatform;
 import org.xhy.infrastructure.payment.model.PaymentCallback;
 import org.xhy.infrastructure.payment.model.PaymentRequest;
@@ -65,6 +66,11 @@ public class StripeProvider extends PaymentProvider {
 
     @Override
     public PaymentResult refundPayment(String providerOrderId, String refundAmount, String refundReason) {
+        return null;
+    }
+
+    @Override
+    public OrderStatus convertToOrderStatus(String platformStatus) {
         return null;
     }
 
