@@ -30,7 +30,7 @@ AgentX 是一个基于大模型 (LLM) 和多能力平台 (MCP) 的智能 Agent �
  - [x] Agent OpenAPI
  - [x] 模型高可用组件
  - [x] RAG
- - [ ] 计费
+ - [x] 计费
  - [ ] Multi Agent
  - [ ] Agent 监控
  - [ ] 知识图谱
