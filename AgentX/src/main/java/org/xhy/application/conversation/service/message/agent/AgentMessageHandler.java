@@ -4,6 +4,7 @@ import dev.langchain4j.service.tool.ToolProvider;
 import org.springframework.stereotype.Component;
 import org.xhy.application.conversation.service.handler.context.ChatContext;
 import org.xhy.application.conversation.service.message.AbstractMessageHandler;
+import org.xhy.application.conversation.service.message.agent.tool.RagToolManager;
 import org.xhy.domain.conversation.service.MessageDomainService;
 import org.xhy.domain.conversation.service.SessionDomainService;
 import org.xhy.domain.llm.service.HighAvailabilityDomainService;
@@ -17,25 +18,12 @@ import org.xhy.domain.user.service.AccountDomainService;
 @Component(value = "agentMessageHandler")
 public class AgentMessageHandler extends AbstractMessageHandler {
 
-    private final AgentToolManager agentToolManager;
 
-    protected final HighAvailabilityDomainService highAvailabilityDomainService;
-    protected final SessionDomainService sessionDomainService;
-    protected final UserSettingsDomainService userSettingsDomainService;
-    protected final LLMDomainService llmDomainService;
+    private AgentToolManager agentToolManager;
 
-    public AgentMessageHandler(LLMServiceFactory llmServiceFactory, MessageDomainService messageDomainService,
-            HighAvailabilityDomainService highAvailabilityDomainService, SessionDomainService sessionDomainService,
-            UserSettingsDomainService userSettingsDomainService, LLMDomainService llmDomainService,
-            BillingService billingService, AccountDomainService accountDomainService,
-            AgentToolManager agentToolManager) {
-        super(llmServiceFactory, messageDomainService, highAvailabilityDomainService, sessionDomainService,
-                userSettingsDomainService, llmDomainService, billingService, accountDomainService);
-        this.agentToolManager = agentToolManager;
-        this.highAvailabilityDomainService = highAvailabilityDomainService;
-        this.sessionDomainService = sessionDomainService;
-        this.userSettingsDomainService = userSettingsDomainService;
-        this.llmDomainService = llmDomainService;
+
+    public AgentMessageHandler(LLMServiceFactory llmServiceFactory, MessageDomainService messageDomainService, HighAvailabilityDomainService highAvailabilityDomainService, SessionDomainService sessionDomainService, UserSettingsDomainService userSettingsDomainService, LLMDomainService llmDomainService, RagToolManager ragToolManager, BillingService billingService, AccountDomainService accountDomainService,AgentToolManager agentToolManager) {
+        super(llmServiceFactory, messageDomainService, highAvailabilityDomainService, sessionDomainService, userSettingsDomainService, llmDomainService, ragToolManager, billingService, accountDomainService);
     }
 
     @Override

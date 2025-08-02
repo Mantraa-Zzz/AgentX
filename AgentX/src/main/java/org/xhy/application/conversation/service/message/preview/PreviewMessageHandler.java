@@ -8,6 +8,7 @@ import org.xhy.application.conversation.service.handler.context.ChatContext;
 import org.xhy.application.conversation.service.message.AbstractMessageHandler;
 import org.xhy.application.conversation.service.message.Agent;
 import org.xhy.application.conversation.service.message.agent.AgentToolManager;
+import org.xhy.application.conversation.service.message.agent.tool.RagToolManager;
 import org.xhy.domain.conversation.constant.MessageType;
 import org.xhy.domain.conversation.model.MessageEntity;
 import org.xhy.domain.conversation.service.MessageDomainService;
@@ -29,25 +30,11 @@ public class PreviewMessageHandler extends AbstractMessageHandler {
 
     private final AgentToolManager agentToolManager;
 
-    protected final HighAvailabilityDomainService highAvailabilityDomainService;
-
-    protected final SessionDomainService sessionDomainService;
-    protected final UserSettingsDomainService userSettingsDomainService;
-    protected final LLMDomainService llmDomainService;
-
-    public PreviewMessageHandler(LLMServiceFactory llmServiceFactory, MessageDomainService messageDomainService,
-            HighAvailabilityDomainService highAvailabilityDomainService, SessionDomainService sessionDomainService,
-            UserSettingsDomainService userSettingsDomainService, LLMDomainService llmDomainService,
-            BillingService billingService, AccountDomainService accountDomainService,
-            AgentToolManager agentToolManager) {
-        super(llmServiceFactory, messageDomainService, highAvailabilityDomainService, sessionDomainService,
-                userSettingsDomainService, llmDomainService, billingService, accountDomainService);
+    public PreviewMessageHandler(LLMServiceFactory llmServiceFactory, MessageDomainService messageDomainService, HighAvailabilityDomainService highAvailabilityDomainService, SessionDomainService sessionDomainService, UserSettingsDomainService userSettingsDomainService, LLMDomainService llmDomainService, RagToolManager ragToolManager, BillingService billingService, AccountDomainService accountDomainService,AgentToolManager agentToolManager) {
+        super(llmServiceFactory, messageDomainService, highAvailabilityDomainService, sessionDomainService, userSettingsDomainService, llmDomainService, ragToolManager, billingService, accountDomainService);
         this.agentToolManager = agentToolManager;
-        this.highAvailabilityDomainService = highAvailabilityDomainService;
-        this.sessionDomainService = sessionDomainService;
-        this.userSettingsDomainService = userSettingsDomainService;
-        this.llmDomainService = llmDomainService;
     }
+
 
     @Override
     protected ToolProvider provideTools(ChatContext chatContext) {
@@ -72,6 +59,10 @@ public class PreviewMessageHandler extends AbstractMessageHandler {
         // 部分响应处理
         tokenStream.onPartialResponse(reply -> {
             messageBuilder.get().append(reply);
+            // 删除换行后消息为空字符串
+            if (messageBuilder.get().toString().trim().isEmpty()) {
+                return;
+            }
             transport.sendMessage(connection, AgentChatResponse.build(reply, MessageType.TEXT));
         });
 
