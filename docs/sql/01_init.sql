@@ -708,3 +708,200 @@ ALTER TABLE user_containers ADD COLUMN last_accessed_at TIMESTAMP NOT NULL DEFAU
 
 -- 添加字段注释
 COMMENT ON COLUMN user_containers.last_accessed_at IS '最后访问时间，用于自动清理判断';
+
+
+-- 订单和支付系统数据库表创建脚本 (PostgreSQL)
+-- 作者: Claude Code
+-- 创建时间: 2025-07-29
+-- 描述: 为AgentX创建订单管理和支付系统相关表
+
+-- 1. 创建订单表 (orders)
+-- 存储订单基本信息，支持多种订单类型和支付方式
+CREATE TABLE orders (
+    id VARCHAR(64) NOT NULL PRIMARY KEY,
+    user_id VARCHAR(64) NOT NULL,
+    order_no VARCHAR(100) NOT NULL UNIQUE,
+    order_type VARCHAR(50) NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    amount DECIMAL(20,8) NOT NULL,
+    currency VARCHAR(10) DEFAULT 'CNY',
+    status INTEGER NOT NULL DEFAULT 1,
+    expired_at TIMESTAMP,
+    paid_at TIMESTAMP,
+    cancelled_at TIMESTAMP,
+    refunded_at TIMESTAMP,
+    refund_amount DECIMAL(20,8) DEFAULT 0.00000000,
+    payment_platform VARCHAR(50),
+    payment_type VARCHAR(50),
+    provider_order_id VARCHAR(200),
+    metadata JSONB,
+    deleted_at TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
+-- 添加索引
+-- 订单表索引
+CREATE INDEX idx_orders_user_id ON orders(user_id);
+CREATE INDEX idx_orders_order_no ON orders(order_no);
+CREATE INDEX idx_orders_status ON orders(status);
+CREATE INDEX idx_orders_order_type ON orders(order_type);
+CREATE INDEX idx_orders_payment_platform ON orders(payment_platform);
+CREATE INDEX idx_orders_payment_type ON orders(payment_type);
+CREATE INDEX idx_orders_provider_order_id ON orders(provider_order_id);
+CREATE INDEX idx_orders_created_at ON orders(created_at);
+CREATE INDEX idx_orders_expired_at ON orders(expired_at);
+
+
+-- 添加表注释
+COMMENT ON TABLE orders IS '订单表，存储各种类型的订单信息和支付方式';
+
+
+-- 添加列注释
+-- 订单表字段注释
+COMMENT ON COLUMN orders.id IS '订单唯一ID';
+COMMENT ON COLUMN orders.user_id IS '用户ID';
+COMMENT ON COLUMN orders.order_no IS '订单号（唯一）';
+COMMENT ON COLUMN orders.order_type IS '订单类型：RECHARGE(充值)、PURCHASE(购买)、SUBSCRIPTION(订阅)';
+COMMENT ON COLUMN orders.title IS '订单标题';
+COMMENT ON COLUMN orders.description IS '订单描述';
+COMMENT ON COLUMN orders.amount IS '订单金额';
+COMMENT ON COLUMN orders.currency IS '货币代码，默认CNY';
+COMMENT ON COLUMN orders.status IS '订单状态：1-待支付，2-已支付，3-已取消，4-已退款，5-已过期';
+COMMENT ON COLUMN orders.expired_at IS '订单过期时间';
+COMMENT ON COLUMN orders.paid_at IS '支付完成时间';
+COMMENT ON COLUMN orders.cancelled_at IS '取消时间';
+COMMENT ON COLUMN orders.refunded_at IS '退款时间';
+COMMENT ON COLUMN orders.refund_amount IS '退款金额';
+COMMENT ON COLUMN orders.payment_platform IS '支付平台：alipay(支付宝)、wechat(微信支付)、stripe(Stripe)';
+COMMENT ON COLUMN orders.payment_type IS '支付类型：web(网页支付)、qr_code(二维码支付)、mobile(移动端支付)、h5(H5支付)、mini_program(小程序支付)';
+COMMENT ON COLUMN orders.provider_order_id IS '第三方支付平台的订单ID，用于查询支付状态和对账';
+COMMENT ON COLUMN orders.metadata IS '订单扩展信息（JSONB格式）';
+
+-- 注释说明：
+-- 1. 订单状态枚举：1-待支付，2-已支付，3-已取消，4-已退款，5-已过期
+-- 2. 支付状态枚举：1-创建，2-等待支付，3-支付成功，4-支付失败，5-已取消
+-- 3. 订单类型支持：RECHARGE(充值)、PURCHASE(购买)、SUBSCRIPTION(订阅)等
+-- 4. 支付平台支持：alipay(支付宝)、wechat(微信支付)、stripe(Stripe)等
+-- 5. 支付类型支持：web(网页支付)、qr_code(二维码支付)、mobile(移动端支付)、h5(H5支付)、mini_program(小程序支付)等
+-- 6. 所有金额字段使用DECIMAL(20,8)确保精度
+-- 7. 使用JSONB存储扩展信息，便于灵活扩展和查询
+-- 8. 建立了完善的索引以支持高效查询
+-- 9. 支持软删除机制（deleted_at字段）
+-- 10. provider_order_id用于与第三方支付平台进行状态同步和对账
+
+
+-- 计费系统数据库表创建脚本 (PostgreSQL)
+-- 作者: Claude Code
+-- 创建时间: 2025-07-26
+-- 描述: 为AgentX计费系统创建Products、Rules、Accounts、UsageRecords表
+
+-- 如果表存在则删除（开发环境重建用）
+DROP TABLE IF EXISTS usage_records;
+DROP TABLE IF EXISTS products;
+DROP TABLE IF EXISTS accounts;
+DROP TABLE IF EXISTS rules;
+
+-- 1. 创建规则表 (rules)
+-- 存储计费规则信息，定义不同的计费策略
+CREATE TABLE rules (
+    id VARCHAR(64) NOT NULL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    handler_key VARCHAR(100) NOT NULL,
+    description TEXT,
+    deleted_at TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
+-- 2. 创建商品表 (products)  
+-- 存储计费商品信息，关联规则和价格配置
+CREATE TABLE products (
+    id VARCHAR(64) NOT NULL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    type VARCHAR(50) NOT NULL,
+    service_id VARCHAR(100) NOT NULL,
+    rule_id VARCHAR(64) NOT NULL,
+    pricing_config JSONB,
+    status INTEGER DEFAULT 1,
+    deleted_at TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 3. 创建账户表 (accounts)
+-- 存储用户账户余额和消费信息
+CREATE TABLE accounts (
+    id VARCHAR(64) NOT NULL PRIMARY KEY,
+    user_id VARCHAR(64) NOT NULL,
+    balance DECIMAL(20,8) DEFAULT 0.00000000,
+    credit DECIMAL(20,8) DEFAULT 0.00000000,
+    total_consumed DECIMAL(20,8) DEFAULT 0.00000000,
+    last_transaction_at TIMESTAMP,
+    deleted_at TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 4. 创建使用记录表 (usage_records)
+-- 存储用户的计费使用记录
+CREATE TABLE usage_records (
+    id VARCHAR(64) NOT NULL PRIMARY KEY,
+    user_id VARCHAR(64) NOT NULL,
+    product_id VARCHAR(64) NOT NULL,
+    quantity_data JSONB,
+    cost DECIMAL(20,8) NOT NULL,
+    request_id VARCHAR(255) NOT NULL,
+    billed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
+-- 添加表注释
+COMMENT ON TABLE rules IS '计费规则表，存储不同的计费策略配置';
+COMMENT ON TABLE products IS '计费商品表，存储可计费的服务和产品信息';
+COMMENT ON TABLE accounts IS '用户账户表，存储用户余额和消费记录';
+COMMENT ON TABLE usage_records IS '使用记录表，存储用户的具体消费记录';
+
+-- 添加列注释
+COMMENT ON COLUMN rules.name IS '规则名称';
+COMMENT ON COLUMN rules.handler_key IS '处理器标识，对应策略枚举';
+COMMENT ON COLUMN rules.description IS '规则描述';
+
+COMMENT ON COLUMN products.name IS '商品名称';
+COMMENT ON COLUMN products.type IS '计费类型：MODEL_USAGE(模型调用), AGENT_CREATION(Agent创建), AGENT_USAGE(Agent使用), API_CALL(API调用), STORAGE_USAGE(存储使用)';
+COMMENT ON COLUMN products.service_id IS '业务服务标识';
+COMMENT ON COLUMN products.rule_id IS '关联的规则ID';
+COMMENT ON COLUMN products.pricing_config IS '价格配置（JSONB格式）';
+COMMENT ON COLUMN products.status IS '状态：1-激活，0-禁用';
+
+COMMENT ON COLUMN accounts.user_id IS '用户ID';
+COMMENT ON COLUMN accounts.balance IS '账户余额';
+COMMENT ON COLUMN accounts.credit IS '信用额度';
+COMMENT ON COLUMN accounts.total_consumed IS '总消费金额';
+COMMENT ON COLUMN accounts.last_transaction_at IS '最后交易时间';
+
+COMMENT ON COLUMN usage_records.user_id IS '用户ID';
+COMMENT ON COLUMN usage_records.product_id IS '商品ID';
+COMMENT ON COLUMN usage_records.quantity_data IS '使用量数据（JSONB格式）';
+COMMENT ON COLUMN usage_records.cost IS '本次消费金额';
+COMMENT ON COLUMN usage_records.request_id IS '请求ID（幂等性保证）';
+COMMENT ON COLUMN usage_records.billed_at IS '计费时间';
+
+-- 插入初始数据：基础计费规则
+INSERT INTO rules (id, name, handler_key, description) VALUES 
+('rule-model-token', '模型Token计费规则', 'MODEL_TOKEN_STRATEGY', '按输入输出Token数量计费，适用于大语言模型调用'),
+('rule-per-unit', '按次计费规则', 'PER_UNIT_STRATEGY', '按使用次数固定计费，适用于Agent创建、API调用等'),
+('rule-per-time', '按时长计费规则', 'PER_TIME_STRATEGY', '按使用时长计费，适用于资源占用类服务');
+
+
+-- 注释说明：
+-- MODEL_USAGE类型的service_id应该是models表中的主键ID（如1,2,3等）
+-- AGENT_CREATION类型使用固定标识'agent_creation'，因为不对应具体业务记录（已预留配置）
+-- 实际部署时，需要根据models表的真实ID更新这些配置
+-- Agent创建计费已完整预留：type='AGENT_CREATION', service_id='agent_creation', cost_per_unit=10.0
