@@ -58,11 +58,9 @@ public class AgentAppService {
 
     public AgentAppService(AgentDomainService agentServiceDomainService,
             AgentWorkspaceDomainService agentWorkspaceDomainService,
-            ScheduledTaskExecutionService scheduledTaskExecutionService,
-                           UserToolDomainService userToolDomainService,
-                           UserRagDomainService userRagDomainService,
-                           RagVersionDomainService ragVersionDomainService,
-                           BillingService billingService) {
+            ScheduledTaskExecutionService scheduledTaskExecutionService, UserToolDomainService userToolDomainService,
+            UserRagDomainService userRagDomainService, RagVersionDomainService ragVersionDomainService,
+            BillingService billingService) {
         this.agentServiceDomainService = agentServiceDomainService;
         this.agentWorkspaceDomainService = agentWorkspaceDomainService;
         this.scheduledTaskExecutionService = scheduledTaskExecutionService;

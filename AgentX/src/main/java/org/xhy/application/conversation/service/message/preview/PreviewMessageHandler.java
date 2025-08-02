@@ -30,11 +30,15 @@ public class PreviewMessageHandler extends AbstractMessageHandler {
 
     private final AgentToolManager agentToolManager;
 
-    public PreviewMessageHandler(LLMServiceFactory llmServiceFactory, MessageDomainService messageDomainService, HighAvailabilityDomainService highAvailabilityDomainService, SessionDomainService sessionDomainService, UserSettingsDomainService userSettingsDomainService, LLMDomainService llmDomainService, RagToolManager ragToolManager, BillingService billingService, AccountDomainService accountDomainService,AgentToolManager agentToolManager) {
-        super(llmServiceFactory, messageDomainService, highAvailabilityDomainService, sessionDomainService, userSettingsDomainService, llmDomainService, ragToolManager, billingService, accountDomainService);
+    public PreviewMessageHandler(LLMServiceFactory llmServiceFactory, MessageDomainService messageDomainService,
+            HighAvailabilityDomainService highAvailabilityDomainService, SessionDomainService sessionDomainService,
+            UserSettingsDomainService userSettingsDomainService, LLMDomainService llmDomainService,
+            RagToolManager ragToolManager, BillingService billingService, AccountDomainService accountDomainService,
+            AgentToolManager agentToolManager) {
+        super(llmServiceFactory, messageDomainService, highAvailabilityDomainService, sessionDomainService,
+                userSettingsDomainService, llmDomainService, ragToolManager, billingService, accountDomainService);
         this.agentToolManager = agentToolManager;
     }
-
 
     @Override
     protected ToolProvider provideTools(ChatContext chatContext) {

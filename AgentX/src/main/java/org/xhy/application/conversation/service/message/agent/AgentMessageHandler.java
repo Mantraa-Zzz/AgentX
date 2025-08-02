@@ -18,12 +18,15 @@ import org.xhy.domain.user.service.AccountDomainService;
 @Component(value = "agentMessageHandler")
 public class AgentMessageHandler extends AbstractMessageHandler {
 
-
     private AgentToolManager agentToolManager;
 
-
-    public AgentMessageHandler(LLMServiceFactory llmServiceFactory, MessageDomainService messageDomainService, HighAvailabilityDomainService highAvailabilityDomainService, SessionDomainService sessionDomainService, UserSettingsDomainService userSettingsDomainService, LLMDomainService llmDomainService, RagToolManager ragToolManager, BillingService billingService, AccountDomainService accountDomainService,AgentToolManager agentToolManager) {
-        super(llmServiceFactory, messageDomainService, highAvailabilityDomainService, sessionDomainService, userSettingsDomainService, llmDomainService, ragToolManager, billingService, accountDomainService);
+    public AgentMessageHandler(LLMServiceFactory llmServiceFactory, MessageDomainService messageDomainService,
+            HighAvailabilityDomainService highAvailabilityDomainService, SessionDomainService sessionDomainService,
+            UserSettingsDomainService userSettingsDomainService, LLMDomainService llmDomainService,
+            RagToolManager ragToolManager, BillingService billingService, AccountDomainService accountDomainService,
+            AgentToolManager agentToolManager) {
+        super(llmServiceFactory, messageDomainService, highAvailabilityDomainService, sessionDomainService,
+                userSettingsDomainService, llmDomainService, ragToolManager, billingService, accountDomainService);
     }
 
     @Override
