@@ -1,6 +1,5 @@
 package org.xhy.application.agent.service;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +22,7 @@ import org.xhy.domain.agent.constant.PublishStatus;
 import org.xhy.interfaces.dto.agent.request.*;
 import org.xhy.domain.scheduledtask.service.ScheduledTaskExecutionService;
 import org.xhy.application.billing.service.BillingService;
-import org.xhy.application.billing.dto.BillingContext;
+import org.xhy.application.billing.dto.RuleContext;
 import org.xhy.domain.product.constant.BillingType;
 import org.xhy.domain.product.constant.UsageDataKeys;
 import org.xhy.infrastructure.exception.InsufficientBalanceException;
@@ -76,7 +75,7 @@ public class AgentAppService {
         logger.info("开始创建Agent - 用户: {}, Agent名称: {}", userId, request.getName());
 
         // 1. 创建计费上下文进行余额预检查
-        BillingContext billingContext = BillingContext.builder().type(BillingType.AGENT_CREATION.getCode())
+        RuleContext billingContext = RuleContext.builder().type(BillingType.AGENT_CREATION.getCode())
                 .serviceId("agent_creation") // 固定业务标识
                 .usageData(Map.of(UsageDataKeys.QUANTITY, 1)).requestId(generateRequestId(userId, "creation"))
                 .userId(userId).build();
