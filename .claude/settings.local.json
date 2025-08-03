@@ -48,7 +48,8 @@
       "mcp__postgres-server__query",
       "Bash(docker rm:*)",
       "WebFetch(domain:github.com)",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(rm:*)"
     ],
     "deny": []
   }

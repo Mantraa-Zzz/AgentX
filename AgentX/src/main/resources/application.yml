@@ -16,10 +16,10 @@ spring:
   application:
     name: AgentX
   rabbitmq:
-    host: ${SPRING_RABBITMQ_HOST}
-    port: ${SPRING_RABBITMQ_PORT}
-    username: ${SPRING_RABBITMQ_USERNAME}
-    password: ${SPRING_RABBITMQ_PASSWORD}
+    host: ${SPRING_RABBITMQ_HOST:}
+    port: ${SPRING_RABBITMQ_PORT:}
+    username: ${SPRING_RABBITMQ_USERNAME:}
+    password: ${SPRING_RABBITMQ_PASSWORD:}
     listener:
       simple: # 添加 simple 下的并发配置
         concurrency: 19
