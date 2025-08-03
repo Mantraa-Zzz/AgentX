@@ -16,6 +16,58 @@ AgentX 是一个基于大模型 (LLM) 和多能力平台 (MCP) 的智能 Agent �
 - 📖 **详细教学**: [敲鸭社区 - code.xhyovo.cn](https://code.xhyovo.cn/)
 - 🎯 **项目演示**: [在线PPT介绍](https://needless-comparison.surge.sh)
 
+## 🚀 快速开始
+
+### 🐳 生产环境部署（推荐）
+适用于想要快速体验或部署生产环境的用户，**无需下载源码**：
+
+```bash
+# 一键启动（包含数据库、消息队列）
+docker run -d \
+  --name agentx \
+  -p 80:80 \
+  ghcr.io/lucky-aeon/agentx:latest
+```
+
+#### 自定义配置启动
+如需自定义配置，可使用配置文件方式：
+
+```bash
+# 1. 创建 .env 配置文件
+# 2. 使用配置文件启动
+docker run -d \
+  --name agentx \
+  -p 80:80 \
+  --env-file .env \
+  ghcr.io/lucky-aeon/agentx:latest
+```
+
+**访问地址**：http://localhost
+
+**默认账号**：
+- 管理员：`admin@agentx.ai` / `admin123`
+
+### 👨‍💻 开发环境部署
+适用于需要修改代码或定制功能的开发者：
+
+```bash
+# 1. 克隆项目
+git clone https://github.com/lucky-aeon/AgentX.git
+cd AgentX/deploy
+
+# 2. 启动开发环境（Linux/macOS）
+./start.sh
+
+# 2. 启动开发环境（Windows）
+start.bat
+```
+
+**开发环境特色**：
+- 🔥 代码热重载
+- 🛠 数据库管理工具
+- 🐛 调试端口开放
+- 📊 详细开发日志
+
 ## ⏳ 功能
  - [x] Agent 管理（创建/发布）
  - [x] LLM 上下文管理（滑动窗口，摘要算法）
@@ -36,53 +88,71 @@ AgentX 是一个基于大模型 (LLM) 和多能力平台 (MCP) 的智能 Agent �
  - [ ] 知识图谱
  - [ ] 长期记忆 
  
-## 🚀 快速部署
+## ⚙️ 环境变量配置
 
-### 👥 用户部署（生产环境）
+AgentX支持通过环境变量进行灵活配置。创建 `.env` 文件：
 
-适用于想要快速体验或部署生产环境的用户，**无需下载源码**：
-
-```bash
-# 一键启动（最简单）
-docker run -d \
-  --name agentx \
-  -p 3000:3000 \
-  -p 8080:8080 \
-  ghcr.io/lucky-aeon/agentx:latest
+### 🗄️ 数据库配置
+```env
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=agentx
+DB_USER=postgres
+DB_PASSWORD=your_secure_password
 ```
 
-**访问地址**：
-- 前端：http://localhost:3000  
-- 后端：http://localhost:8080
-
-**默认账号**：
-- 管理员：admin@agentx.ai / admin123
-- 测试用户：test@agentx.ai / test123
-
-### 👨‍💻 开发者部署（开发环境）
-
-适用于需要修改代码的开发者：
-
-```bash
-# 1. 克隆项目
-git clone https://github.com/lucky-aeon/AgentX.git
-cd AgentX/deploy
-
-# 2. 启动开发环境
-./start.sh
+### 🐰 消息队列配置
+```env
+RABBITMQ_HOST=localhost
+RABBITMQ_PORT=5672
+RABBITMQ_USERNAME=guest
+RABBITMQ_PASSWORD=your_rabbitmq_password
 ```
 
-**开发环境特色**：
-- 🔥 代码热重载
-- 🛠 数据库管理工具 (http://localhost:8081)
-- 🐛 调试端口开放
-- 📊 详细开发日志
+### 👤 系统用户配置
+```env
+AGENTX_ADMIN_EMAIL=admin@agentx.ai
+AGENTX_ADMIN_PASSWORD=admin123
+AGENTX_ADMIN_NICKNAME=AgentX管理员
+AGENTX_TEST_ENABLED=true
+AGENTX_TEST_EMAIL=test@agentx.ai
+AGENTX_TEST_PASSWORD=test123
+```
 
-### 📖 详细文档
+### 📧 邮件服务配置（可选）
+```env
+MAIL_SMTP_HOST=smtp.qq.com
+MAIL_SMTP_PORT=587
+MAIL_SMTP_USERNAME=your_email@qq.com
+MAIL_SMTP_PASSWORD=your_email_password
+```
+
+### 🔐 OAuth配置（可选）
+```env
+GITHUB_CLIENT_ID=your_github_client_id
+GITHUB_CLIENT_SECRET=your_github_client_secret
+GITHUB_REDIRECT_URI=https://your-domain/oauth/github/callback
+```
+### ☁️ 对象存储配置（可选）
+
+# AWS S3
+```
+S3_SECRET_ID=your_s3_access_key
+S3_SECRET_KEY=your_s3_secret_key
+S3_REGION=us-east-1
+S3_ENDPOINT=https://s3.amazonaws.com
+S3_BUCKET_NAME=your_bucket
+```
+
+
+
+
+
+## 📖 部署文档
 
 | 文档 | 说明 |
 |------|------|
-| [生产部署指南](docs/deployment/PRODUCTION_DEPLOY.md) | 用户生产环境部署 |
+| [生产部署指南](docs/deployment/PRODUCTION_DEPLOY.md) | 生产环境完整部署 |
 | [开发部署指南](deploy/README.md) | 开发者环境配置 |
 | [故障排查手册](docs/deployment/TROUBLESHOOTING.md) | 问题诊断和解决 |
 
