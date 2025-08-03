@@ -9,6 +9,8 @@ import org.xhy.domain.llm.service.HighAvailabilityDomainService;
 import org.xhy.domain.llm.service.LLMDomainService;
 import org.xhy.domain.user.service.UserSettingsDomainService;
 import org.xhy.infrastructure.llm.LLMServiceFactory;
+import org.xhy.application.billing.service.BillingService;
+import org.xhy.domain.user.service.AccountDomainService;
 
 /** 标准消息处理器 */
 @Component(value = "chatMessageHandler")
@@ -17,8 +19,8 @@ public class ChatMessageHandler extends AbstractMessageHandler {
     public ChatMessageHandler(LLMServiceFactory llmServiceFactory, MessageDomainService messageDomainService,
             HighAvailabilityDomainService highAvailabilityDomainService, SessionDomainService sessionDomainService,
             UserSettingsDomainService userSettingsDomainService, LLMDomainService llmDomainService,
-            RagToolManager ragToolManager) {
+            RagToolManager ragToolManager, BillingService billingService, AccountDomainService accountDomainService) {
         super(llmServiceFactory, messageDomainService, highAvailabilityDomainService, sessionDomainService,
-                userSettingsDomainService, llmDomainService, ragToolManager);
+                userSettingsDomainService, llmDomainService, ragToolManager, billingService, accountDomainService);
     }
 }
