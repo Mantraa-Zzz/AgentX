@@ -134,9 +134,14 @@ GITHUB_CLIENT_SECRET=your_github_client_secret
 GITHUB_REDIRECT_URI=https://your-domain/oauth/github/callback
 ```
 ### ☁️ 对象存储配置（可选）
+```env
+# 阿里云OSS
+OSS_ENDPOINT=https://oss-cn-beijing.aliyuncs.com
+OSS_ACCESS_KEY=your_access_key
+OSS_SECRET_KEY=your_secret_key
+OSS_BUCKET=your_bucket_name
 
 # AWS S3
-```
 S3_SECRET_ID=your_s3_access_key
 S3_SECRET_KEY=your_s3_secret_key
 S3_REGION=us-east-1
@@ -144,7 +149,31 @@ S3_ENDPOINT=https://s3.amazonaws.com
 S3_BUCKET_NAME=your_bucket
 ```
 
+### 🤖 AI服务配置（可选）
+```env
+SILICONFLOW_API_KEY=your_api_key
+SILICONFLOW_API_URL_RERANK=https://api.siliconflow.cn/v1/rerank
+MCP_GATEWAY_URL=http://localhost:8005
+```
 
+### 💳 支付配置（可选）
+```env
+# 支付宝配置
+ALIPAY_APP_ID=your_alipay_app_id
+ALIPAY_PRIVATE_KEY=your_alipay_private_key
+ALIPAY_PUBLIC_KEY=your_alipay_public_key
+
+# Stripe配置
+STRIPE_SECRET_KEY=your_stripe_secret_key
+STRIPE_PUBLISHABLE_KEY=your_stripe_publishable_key
+```
+
+<details>
+<summary>查看完整环境变量列表</summary>
+
+包含高可用网关、向量数据库等更多配置选项，请查看完整的 `application.yml` 文件了解所有可配置参数。
+
+</details>
 
 
 
