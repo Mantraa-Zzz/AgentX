@@ -41,6 +41,7 @@ import org.xhy.domain.token.model.TokenProcessResult;
 import org.xhy.domain.token.model.config.TokenOverflowConfig;
 import org.xhy.domain.token.service.TokenDomainService;
 import org.xhy.domain.tool.model.UserToolEntity;
+import org.xhy.domain.tool.service.ToolDomainService;
 import org.xhy.domain.tool.service.UserToolDomainService;
 import org.xhy.infrastructure.exception.BusinessException;
 import org.xhy.infrastructure.llm.config.ProviderConfig;
@@ -50,7 +51,6 @@ import org.xhy.infrastructure.transport.MessageTransportFactory;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 /** 对话应用服务，用于适配域层的对话服务 */
@@ -346,7 +346,6 @@ public class ConversationAppService {
         tokenOverflowConfig.setStrategyType(strategyType);
         tokenOverflowConfig.setMaxTokens(llmModelConfig.getMaxTokens());
         tokenOverflowConfig.setSummaryThreshold(llmModelConfig.getSummaryThreshold());
-        tokenOverflowConfig.setReserveRatio(llmModelConfig.getReserveRatio());
 
         // 设置提供商配置
         org.xhy.domain.llm.model.config.ProviderConfig providerConfig = provider.getConfig();
@@ -355,10 +354,10 @@ public class ConversationAppService {
 
         // 处理Token
         TokenProcessResult result = tokenDomainService.processMessages(tokenMessages, tokenOverflowConfig);
-        List<TokenMessage> retainedMessages = new ArrayList<>(tokenMessages);
+
         // 更新上下文
         if (result.isProcessed()) {
-            retainedMessages = result.getRetainedMessages();
+            List<TokenMessage> retainedMessages = result.getRetainedMessages();
             List<String> retainedMessageIds = retainedMessages.stream().map(TokenMessage::getId)
                     .collect(Collectors.toList());
 
@@ -369,11 +368,11 @@ public class ConversationAppService {
             }
 
             contextEntity.setActiveMessages(retainedMessageIds);
+            messageEntities = messageDomainService.listByIds(retainedMessageIds);
+
         }
-        Set<String> retainedMessageIdSet = retainedMessages.stream().map(TokenMessage::getId)
-                .collect(Collectors.toSet());
-        return messageEntities.stream().filter(message -> retainedMessageIdSet.contains(message.getId()))
-                .collect(Collectors.toList());
+
+        return messageEntities;
     }
 
     /** 消息实体转换为token消息 */
@@ -384,7 +383,6 @@ public class ConversationAppService {
             tokenMessage.setRole(message.getRole().name());
             tokenMessage.setContent(message.getContent());
             tokenMessage.setTokenCount(message.getTokenCount());
-            tokenMessage.setBodyTokenCount(message.getBodyTokenCount());
             tokenMessage.setCreatedAt(message.getCreatedAt());
             return tokenMessage;
         }).collect(Collectors.toList());
