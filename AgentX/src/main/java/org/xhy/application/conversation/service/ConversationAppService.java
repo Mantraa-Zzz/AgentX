@@ -43,6 +43,7 @@ import org.xhy.domain.token.model.TokenProcessResult;
 import org.xhy.domain.token.model.config.TokenOverflowConfig;
 import org.xhy.domain.token.service.TokenDomainService;
 import org.xhy.domain.tool.model.UserToolEntity;
+import org.xhy.domain.tool.service.ToolDomainService;
 import org.xhy.domain.tool.service.UserToolDomainService;
 import org.xhy.infrastructure.exception.BusinessException;
 import org.xhy.infrastructure.llm.config.ProviderConfig;
