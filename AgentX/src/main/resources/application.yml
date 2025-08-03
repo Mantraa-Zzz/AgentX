@@ -1,5 +1,5 @@
 server:
-  port: 8088
+  port: ${SERVER_PORT:8088}
   servlet:
     context-path: /api
   # 添加Tomcat异步请求配置
@@ -16,10 +16,10 @@ spring:
   application:
     name: AgentX
   rabbitmq:
-    host: ${SPRING_RABBITMQ_HOST}
-    port: ${SPRING_RABBITMQ_PORT}
-    username: ${SPRING_RABBITMQ_USERNAME}
-    password: ${SPRING_RABBITMQ_PASSWORD}
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
     listener:
       simple: # 添加 simple 下的并发配置
         concurrency: 19
@@ -47,7 +47,7 @@ spring:
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:agentx}
-    username: ${DB_USERNAME:postgres}
+    username: ${DB_USER:postgres}
     password: ${DB_PASSWORD:postgres}
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
@@ -102,7 +102,7 @@ oauth:
 
 # 高可用网关配置
 high-availability:
-  enabled: false # 是否启用高可用功能
+  enabled: ${HIGH_AVAILABILITY_ENABLED:false} # 是否启用高可用功能
   gateway-url: ${HIGH_AVAILABILITY_GATEWAY_URL:http://localhost:8081} # 高可用网关地址
   api-key: ${HIGH_AVAILABILITY_API_KEY:default-api-key-1234567890} # API密钥
   connect-timeout: 30000 # 连接超时时间(毫秒)
@@ -131,7 +131,7 @@ embedding:
   vector-store:
     host: ${VECTOR_DB_HOST:${DB_HOST:localhost}}
     port: ${VECTOR_DB_PORT:${DB_PORT:5432}}
-    user: ${VECTOR_DB_USER:${DB_USERNAME:postgres}}
+    user: ${VECTOR_DB_USER:${DB_USER:postgres}}
     password: ${VECTOR_DB_PASSWORD:${DB_PASSWORD:postgres}}
     database: ${VECTOR_DB_NAME:${DB_NAME:agentx}}
     table: ${VECTOR_DB_TABLE:public.vector_store}
@@ -162,7 +162,6 @@ dromara:
         domain: ${S3_DOMAIN} # 访问域名，注意“/”结尾，例如：https://abc.hn-bkt.clouddn.com/
         base-path: s3/ # 基础路径
 
-  url-prefix: ${S3_URL_PREFIX:}
 payment:
   alipay:
     app-id: ${ALIPAY_APP_ID:}
@@ -171,3 +170,18 @@ payment:
   stripe:
     secret-key: ${STRIPE_SECRET_KEY:}
     publishable-key: ${STRIPE_PUBLISHABLE_KEY:}
+
+# AgentX系统配置
+agentx:
+  # 管理员用户配置
+  admin:
+    email: ${AGENTX_ADMIN_EMAIL:admin@agentx.ai}
+    password: ${AGENTX_ADMIN_PASSWORD:admin123}
+    nickname: ${AGENTX_ADMIN_NICKNAME:AgentX管理员}
+
+  # 测试用户配置
+  test:
+    enabled: ${AGENTX_TEST_ENABLED:true}
+    email: ${AGENTX_TEST_EMAIL:test@agentx.ai}
+    password: ${AGENTX_TEST_PASSWORD:test123}
+    nickname: ${AGENTX_TEST_NICKNAME:测试用户}
