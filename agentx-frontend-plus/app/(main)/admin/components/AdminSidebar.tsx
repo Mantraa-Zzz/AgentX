@@ -15,7 +15,8 @@ import {
   Container,
   CreditCard,
   BookOpen,
-  Database
+  Database,
+  Package
 } from "lucide-react";
 
 interface MenuItemProps {
@@ -85,6 +86,11 @@ export function AdminSidebar() {
       href: "/admin/products",
       icon: CreditCard,
       label: "商品管理",
+    },
+    {
+      href: "/admin/orders",
+      icon: Package,
+      label: "订单管理",
     },
     {
       href: "/admin/rules",
