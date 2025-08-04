@@ -18,31 +18,54 @@ AgentX 是一个基于大模型 (LLM) 和多能力平台 (MCP) 的智能 Agent �
 
 ## 🚀 快速开始
 
-### 🐳 生产环境部署（推荐）(还未实现)
-适用于想要快速体验或部署生产环境的用户，**无需下载源码**：
+### 🐳 生产环境部署（推荐）
+
+#### 基础版部署
+适用于想要快速体验核心功能的用户，**无需下载源码**：
 
 ```bash
-# 一键启动（包含数据库、消息队列）
+# 一键启动（包含前端+后端+数据库+消息队列）
 docker run -d \
-  --name agentx \
-  -p 80:80 \
+  --name agentx-core \
+  -p 3000:3000 \
+  -p 8088:8088 \
   ghcr.io/lucky-aeon/agentx:latest
 ```
 
-#### 自定义配置启动
-如需自定义配置，可使用配置文件方式：
+**访问地址**：http://localhost:3000
+
+#### 完整版部署
+如需API网关的高可用功能，可额外部署API网关：
 
 ```bash
-# 1. 创建 .env 配置文件
-# 2. 使用配置文件启动
+# 1. 启动核心服务
 docker run -d \
-  --name agentx \
-  -p 80:80 \
-  --env-file .env \
+  --name agentx-core \
+  -p 3000:3000 \
+  -p 8088:8088 \
   ghcr.io/lucky-aeon/agentx:latest
+
+# 2. 启动API网关（可选）
+docker run -d \
+  --name agentx-gateway \
+  -p 8081:8081 \
+  ghcr.io/lucky-aeon/api-premium-gateway:latest
 ```
 
-**访问地址**：http://localhost
+**访问地址**：
+- 主应用：http://localhost:3000  
+- API网关：http://localhost:8081
+
+#### 功能对比
+
+| 功能 | 基础版 | 完整版 |
+|------|--------|--------|
+| AI助手对话 | ✅ | ✅ |
+| 知识库管理 | ✅ | ✅ |  
+| 工具市场 | ✅ | ✅ |
+| API高可用 | ❌ | ✅ |
+| 负载均衡 | ❌ | ✅ |
+| API监控 | ❌ | ✅ |
 
 **默认账号**：
 - 管理员：`admin@agentx.ai` / `admin123`
@@ -127,26 +150,6 @@ MAIL_SMTP_USERNAME=your_email@qq.com
 MAIL_SMTP_PASSWORD=your_email_password
 ```
 
-### 💳 支付配置（可选）
-```env
-# 支付宝配置
-ALIPAY_APP_ID=your_alipay_app_id
-ALIPAY_PRIVATE_KEY=your_alipay_private_key
-ALIPAY_PUBLIC_KEY=your_alipay_public_key
-
-# Stripe配置
-STRIPE_SECRET_KEY=your_stripe_secret_key
-STRIPE_PUBLISHABLE_KEY=your_stripe_publishable_key
-STRIPE_WEBHOOK_SECRET=your_stripe_webhook_secret
-```
-
-### 🔗 GitHub集成配置（可选）
-```env
-GITHUB_REPO_NAME=agent-mcp-community
-GITHUB_USERNAME=your_github_username
-GITHUB_TOKEN=your_github_token
-```
-
 ### 🔐 OAuth配置（可选）
 ```env
 GITHUB_CLIENT_ID=your_github_client_id
@@ -186,6 +189,13 @@ STRIPE_PUBLISHABLE_KEY=your_stripe_publishable_key
 
 
 
+## 📖 部署文档
+
+| 文档 | 说明 |
+|------|------|
+| [生产部署指南](docs/deployment/PRODUCTION_DEPLOY.md) | 生产环境完整部署 |
+| [开发部署指南](deploy/README.md) | 开发者环境配置 |
+| [故障排查手册](docs/deployment/TROUBLESHOOTING.md) | 问题诊断和解决 |
 
 ## 功能介绍
 
