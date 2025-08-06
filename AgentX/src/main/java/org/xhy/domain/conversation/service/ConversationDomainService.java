@@ -42,8 +42,7 @@ public class ConversationDomainService {
      * 
      * @param sessionId 会话id */
     public void deleteConversationMessages(String sessionId) {
-        messageRepository
-                .checkedDelete(Wrappers.<MessageEntity>lambdaQuery().eq(MessageEntity::getSessionId, sessionId));
+        messageRepository.delete(Wrappers.<MessageEntity>lambdaQuery().eq(MessageEntity::getSessionId, sessionId));
     }
 
     public void deleteConversationMessages(List<String> sessionIds) {

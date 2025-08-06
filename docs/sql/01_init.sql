@@ -1,3 +1,6 @@
+-- 创建 pgvector 扩展（向量数据库支持）
+CREATE EXTENSION IF NOT EXISTS vector;
+
 create table public.accounts (
                                  id character varying(64) primary key not null,
                                  user_id character varying(64) not null, -- 用户ID
@@ -17,7 +20,7 @@ comment on column public.accounts.total_consumed is '总消费金额';
 comment on column public.accounts.last_transaction_at is '最后交易时间';
 
 create table public.agent_execution_details (
-                                                id bigint primary key not null default nextval('agent_execution_details_id_seq'::regclass),
+                                                id bigserial primary key not null,
                                                 trace_id character varying(64) not null, -- 关联汇总表的追踪ID
                                                 sequence_no integer not null, -- 执行序号，同一trace_id内递增
                                                 step_type character varying(32) not null, -- 步骤类型：USER_MESSAGE, AI_RESPONSE, TOOL_CALL
@@ -59,7 +62,7 @@ comment on column public.agent_execution_details.tool_response_data is '工具�
 comment on column public.agent_execution_details.is_fallback_used is '是否触发了平替/降级';
 
 create table public.agent_execution_summary (
-                                                id bigint primary key not null default nextval('agent_execution_summary_id_seq'::regclass),
+                                                id bigserial primary key not null,
                                                 trace_id character varying(64) not null, -- 执行追踪ID，唯一标识一次完整执行
                                                 user_id character varying(64) not null, -- 用户ID (String类型UUID)
                                                 session_id character varying(64) not null, -- 会话ID
