@@ -127,6 +127,26 @@ MAIL_SMTP_USERNAME=your_email@qq.com
 MAIL_SMTP_PASSWORD=your_email_password
 ```
 
+### 💳 支付配置（可选）
+```env
+# 支付宝配置
+ALIPAY_APP_ID=your_alipay_app_id
+ALIPAY_PRIVATE_KEY=your_alipay_private_key
+ALIPAY_PUBLIC_KEY=your_alipay_public_key
+
+# Stripe配置
+STRIPE_SECRET_KEY=your_stripe_secret_key
+STRIPE_PUBLISHABLE_KEY=your_stripe_publishable_key
+STRIPE_WEBHOOK_SECRET=your_stripe_webhook_secret
+```
+
+### 🔗 GitHub集成配置（可选）
+```env
+GITHUB_REPO_NAME=agent-mcp-community
+GITHUB_USERNAME=your_github_username
+GITHUB_TOKEN=your_github_token
+```
+
 ### 🔐 OAuth配置（可选）
 ```env
 GITHUB_CLIENT_ID=your_github_client_id
@@ -135,12 +155,6 @@ GITHUB_REDIRECT_URI=https://your-domain/oauth/github/callback
 ```
 ### ☁️ 对象存储配置（可选）
 ```env
-# 阿里云OSS
-OSS_ENDPOINT=https://oss-cn-beijing.aliyuncs.com
-OSS_ACCESS_KEY=your_access_key
-OSS_SECRET_KEY=your_secret_key
-OSS_BUCKET=your_bucket_name
-
 # AWS S3
 S3_SECRET_ID=your_s3_access_key
 S3_SECRET_KEY=your_s3_secret_key
@@ -149,12 +163,7 @@ S3_ENDPOINT=https://s3.amazonaws.com
 S3_BUCKET_NAME=your_bucket
 ```
 
-### 🤖 AI服务配置（可选）
-```env
-SILICONFLOW_API_KEY=your_api_key
-SILICONFLOW_API_URL_RERANK=https://api.siliconflow.cn/v1/rerank
-MCP_GATEWAY_URL=http://localhost:8005
-```
+
 
 ### 💳 支付配置（可选）
 ```env
@@ -177,13 +186,6 @@ STRIPE_PUBLISHABLE_KEY=your_stripe_publishable_key
 
 
 
-## 📖 部署文档
-
-| 文档 | 说明 |
-|------|------|
-| [生产部署指南](docs/deployment/PRODUCTION_DEPLOY.md) | 生产环境完整部署 |
-| [开发部署指南](deploy/README.md) | 开发者环境配置 |
-| [故障排查手册](docs/deployment/TROUBLESHOOTING.md) | 问题诊断和解决 |
 
 ## 功能介绍
 
