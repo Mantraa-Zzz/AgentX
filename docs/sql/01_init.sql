@@ -1,3 +1,6 @@
+-- 创建 pgvector 扩展（向量数据库支持）
+CREATE EXTENSION IF NOT EXISTS vector;
+
 create table public.accounts (
                                  id character varying(64) primary key not null,
                                  user_id character varying(64) not null, -- 用户ID
@@ -17,7 +20,7 @@ comment on column public.accounts.total_consumed is '总消费金额';
 comment on column public.accounts.last_transaction_at is '最后交易时间';
 
 create table public.agent_execution_details (
-                                                id bigint primary key not null default nextval('agent_execution_details_id_seq'::regclass),
+                                                id bigserial primary key not null,
                                                 trace_id character varying(64) not null, -- 关联汇总表的追踪ID
                                                 sequence_no integer not null, -- 执行序号，同一trace_id内递增
                                                 step_type character varying(32) not null, -- 步骤类型：USER_MESSAGE, AI_RESPONSE, TOOL_CALL
@@ -59,7 +62,7 @@ comment on column public.agent_execution_details.tool_response_data is '工具�
 comment on column public.agent_execution_details.is_fallback_used is '是否触发了平替/降级';
 
 create table public.agent_execution_summary (
-                                                id bigint primary key not null default nextval('agent_execution_summary_id_seq'::regclass),
+                                                id bigserial primary key not null,
                                                 trace_id character varying(64) not null, -- 执行追踪ID，唯一标识一次完整执行
                                                 user_id character varying(64) not null, -- 用户ID (String类型UUID)
                                                 session_id character varying(64) not null, -- 会话ID
@@ -485,6 +488,7 @@ create table public.messages (
                                  content text not null, -- 消息内容
                                  message_type character varying(20) not null default 'TEXT', -- 消息类型
                                  token_count integer default 0, -- Token数量
+                                 body_token_count INTEGER DEFAULT 0, -- 消息本体的token数量
                                  provider character varying(50), -- 服务提供商
                                  model character varying(50), -- 使用的模型
                                  metadata jsonb, -- 消息元数据，JSON格式
@@ -501,6 +505,7 @@ comment on column public.messages.role is '消息角色 (user, assistant, system
 comment on column public.messages.content is '消息内容';
 comment on column public.messages.message_type is '消息类型';
 comment on column public.messages.token_count is 'Token数量';
+comment on column public.messages.body_token_count is '消息本体的token数量';
 comment on column public.messages.provider is '服务提供商';
 comment on column public.messages.model is '使用的模型';
 comment on column public.messages.metadata is '消息元数据，JSON格式';

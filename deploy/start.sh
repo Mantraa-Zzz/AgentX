@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# AgentX一键启动脚本
-# 支持多种部署模式：local/production/external
+# AgentX本地开发环境启动脚本
+# 专用于开发者进行本地开发和调试
 
 set -e
 
@@ -20,7 +20,7 @@ echo "  ▒██  ▀█▄  ▒██░▄▄▄░ ▒███   ▓██ 
 echo "  ░██▄▄▄▄██ ░▓█  ██▓ ▒▓█  ▄ ▓██▒  ▐▌██▒░ ▓██▓ ░  ░ █ █ ▒ "
 echo "   ▓█   ▓██▒░▒▓███▀▒ ░▒████▒▒██░   ▓██░  ▒██▒ ░ ▒██▒ ▒██▒"
 echo -e "   ▒▒   ▓▒█░ ░▒   ▒  ░░ ▒░ ░░ ▒░   ▒ ▒   ▒ ░░   ▒▒ ░ ░▓ ░ ${NC}"
-echo -e "${GREEN}            智能AI助手平台 - 统一部署工具${NC}"
+echo -e "${GREEN}            智能AI助手平台 - 开发环境启动工具${NC}"
 echo -e "${BLUE}========================================================${NC}"
 echo
 
@@ -41,8 +41,6 @@ check_docker() {
 set_development_mode() {
     MODE="dev"
     ENV_FILE=".env.local.example"
-    PROFILE="local,dev"
-    DOCKERFILE_SUFFIX=".dev"
     
     echo -e "${GREEN}🔥 启动开发模式${NC}"
     echo "  - 内置数据库 + 消息队列"
@@ -68,14 +66,12 @@ prepare_env() {
 start_services() {
     echo -e "${BLUE}启动AgentX服务...${NC}"
     echo "部署模式: $MODE"
-    echo "Docker Compose Profile: $PROFILE"
     echo
 
-    # 设置环境变量
-    export COMPOSE_PROFILES="$PROFILE"
-    export DOCKERFILE_SUFFIX="$DOCKERFILE_SUFFIX"
+    # 设置开发环境的Docker Compose后缀
+    export DOCKERFILE_SUFFIX=".dev"
 
-    # 启动服务 (支持多个profile)
+    # 启动开发环境服务 (使用local和dev profile)
     docker compose --profile local --profile dev up -d --build
 
     echo
