@@ -36,6 +36,7 @@ cp .env.example .env
 
 ```bash
 # 一键启动（包含前端+后端+数据库+消息队列）
+# 🎯 智能适配：本地、内网、服务器环境均可使用相同命令
 docker run -d \
   --name agentx \
   -p 3000:3000 \
@@ -48,6 +49,8 @@ docker run -d \
   -v agentx-storage:/app/storage \
   ghcr.io/lucky-aeon/agentx:latest
 ```
+
+> 🚀 **智能部署**：无需区分本地或服务器环境，前端自动检测当前访问IP并连接对应的后端服务
 
 #### 访问服务
 
@@ -73,6 +76,29 @@ docker run -d \
 **默认登录账号**：
 - 管理员：`admin@agentx.ai` / `admin123`
 - 测试用户：`test@agentx.ai` / `test123`
+
+#### 🌐 部署场景示例
+
+**本地开发**：
+```bash
+# 访问: http://localhost:3000
+# API自动指向: http://localhost:8088/api ✅
+```
+
+**内网服务器**：
+```bash
+# 访问: http://192.168.1.100:3000
+# API自动指向: http://192.168.1.100:8088/api ✅
+```
+
+**公网服务器**：
+```bash
+# 访问: http://your-server-ip:3000
+# API自动指向: http://your-server-ip:8088/api ✅
+
+# 访问: http://your-domain.com:3000
+# API自动指向: http://your-domain.com:8088/api ✅
+```
 
 > 💡 **提示**：生产环境部署前，请在.env文件中修改默认密码和JWT密钥
 
