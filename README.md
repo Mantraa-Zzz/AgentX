@@ -18,57 +18,63 @@ AgentX 是一个基于大模型 (LLM) 和多能力平台 (MCP) 的智能 Agent �
 
 ## 🚀 快速开始
 
-### 🐳 生产环境部署（推荐）
+### 🐳 一键部署（推荐）
 
-#### 基础版部署
-适用于想要快速体验核心功能的用户，**无需下载源码**：
+适用于想要快速体验完整功能的用户，**无需下载源码**，一个命令启动所有服务：
+
+#### 步骤1：准备配置文件
+
+```bash
+# 下载配置文件模板
+curl -O https://raw.githubusercontent.com/lucky-aeon/AgentX/main/.env.example
+# 复制并编辑配置
+cp .env.example .env
+# 根据需要修改 .env 文件中的配置
+```
+
+#### 步骤2：启动服务
 
 ```bash
 # 一键启动（包含前端+后端+数据库+消息队列）
 docker run -d \
-  --name agentx-core \
+  --name agentx \
   -p 3000:3000 \
   -p 8088:8088 \
+  -p 5432:5432 \
+  -p 5672:5672 \
+  -p 15672:15672 \
+  --env-file .env \
+  -v agentx-data:/var/lib/postgresql/data \
+  -v agentx-storage:/app/storage \
   ghcr.io/lucky-aeon/agentx:latest
 ```
 
-**访问地址**：http://localhost:3000
+#### 访问服务
 
-#### 完整版部署
-如需API网关的高可用功能，可额外部署API网关：
+| 服务 | 地址 | 说明 |
+|------|------|------|
+| **主应用** | http://localhost:3000 | 前端界面 |
+| **后端API** | http://localhost:8088 | API服务 |
+| **数据库** | localhost:5432 | PostgreSQL（可选） |
+| **RabbitMQ** | localhost:5672 | 消息队列（可选） |
+| **RabbitMQ管理** | http://localhost:15672 | 队列管理界面（可选） |
+
+#### 高可用网关（可选）
+
+如需API高可用功能，可额外部署：
 
 ```bash
-# 1. 启动核心服务
-docker run -d \
-  --name agentx-core \
-  -p 3000:3000 \
-  -p 8088:8088 \
-  ghcr.io/lucky-aeon/agentx:latest
-
-# 2. 启动API网关（可选）
 docker run -d \
   --name agentx-gateway \
   -p 8081:8081 \
   ghcr.io/lucky-aeon/api-premium-gateway:latest
 ```
 
-**访问地址**：
-- 主应用：http://localhost:3000  
-- API网关：http://localhost:8081
-
-#### 功能对比
-
-| 功能 | 基础版 | 完整版 |
-|------|--------|--------|
-| AI助手对话 | ✅ | ✅ |
-| 知识库管理 | ✅ | ✅ |  
-| 工具市场 | ✅ | ✅ |
-| API高可用 | ❌ | ✅ |
-| 负载均衡 | ❌ | ✅ |
-| API监控 | ❌ | ✅ |
-
-**默认账号**：
+**默认登录账号**：
 - 管理员：`admin@agentx.ai` / `admin123`
+- 测试用户：`test@agentx.ai` / `test123`
+
+> 💡 **提示**：生产环境部署前，请在.env文件中修改默认密码和JWT密钥
 
 ### 👨‍💻 开发环境部署
 适用于需要修改代码或定制功能的开发者：
@@ -113,79 +119,110 @@ start.bat
  
 ## ⚙️ 环境变量配置
 
-AgentX支持通过环境变量进行灵活配置。创建 `.env` 文件：
+AgentX使用`.env`配置文件进行环境变量管理，支持丰富的自定义配置：
 
-### 🗄️ 数据库配置
-```env
-DB_HOST=localhost
-DB_PORT=5432
-DB_NAME=agentx
-DB_USER=postgres
-DB_PASSWORD=your_secure_password
+### 📁 配置文件说明
+
+| 配置项 | 说明 | 默认值 |
+|--------|------|-------|
+| **基础服务** |  |  |
+| `SERVER_PORT` | 后端API端口 | `8088` |
+| `DB_PASSWORD` | 数据库密码 | `agentx_pass` |
+| `RABBITMQ_PASSWORD` | 消息队列密码 | `guest` |
+| **安全配置** |  |  |
+| `JWT_SECRET` | JWT密钥（必须修改） | 需要设置 |
+| `AGENTX_ADMIN_PASSWORD` | 管理员密码 | `admin123` |
+| **外部服务** |  |  |
+| `EXTERNAL_DB_HOST` | 外部数据库地址 | 空（使用内置） |
+| `EXTERNAL_RABBITMQ_HOST` | 外部消息队列地址 | 空（使用内置） |
+
+### 🔧 快速配置
+
+```bash
+# 1. 获取配置模板
+curl -O https://raw.githubusercontent.com/lucky-aeon/AgentX/main/.env.example
+
+# 2. 创建配置文件
+cp .env.example .env
+
+# 3. 编辑配置（必改项）
+vim .env
 ```
 
-### 🐰 消息队列配置
+**必须修改的配置项**：
+- `JWT_SECRET`: 设置安全的JWT密钥（至少32字符）
+- `AGENTX_ADMIN_PASSWORD`: 修改管理员密码
+- `DB_PASSWORD`: 修改数据库密码
+
+### 📝 配置分类
+
+<details>
+<summary><strong>🔐 安全配置（重要）</strong></summary>
+
 ```env
-RABBITMQ_HOST=localhost
-RABBITMQ_PORT=5672
-RABBITMQ_USERNAME=guest
-RABBITMQ_PASSWORD=your_rabbitmq_password
+# 生产环境必须修改
+JWT_SECRET=your_secure_jwt_secret_key_at_least_32_characters
+AGENTX_ADMIN_PASSWORD=your_secure_admin_password
+DB_PASSWORD=your_secure_db_password
+RABBITMQ_PASSWORD=your_secure_mq_password
 ```
 
-### 👤 系统用户配置
+</details>
+
+<details>
+<summary><strong>🔗 外部服务集成</strong></summary>
+
 ```env
-AGENTX_ADMIN_EMAIL=admin@agentx.ai
-AGENTX_ADMIN_PASSWORD=admin123
-AGENTX_ADMIN_NICKNAME=AgentX管理员
-AGENTX_TEST_ENABLED=true
-AGENTX_TEST_EMAIL=test@agentx.ai
-AGENTX_TEST_PASSWORD=test123
+# 使用外部数据库
+EXTERNAL_DB_HOST=your-postgres-host
+DB_HOST=your-postgres-host
+DB_USER=your-db-user
+DB_PASSWORD=your-db-password
+
+# 使用外部消息队列
+EXTERNAL_RABBITMQ_HOST=your-rabbitmq-host
+RABBITMQ_HOST=your-rabbitmq-host
+RABBITMQ_USERNAME=your-mq-user
+RABBITMQ_PASSWORD=your-mq-password
 ```
 
-### 📧 邮件服务配置（可选）
-```env
-MAIL_SMTP_HOST=smtp.qq.com
-MAIL_SMTP_PORT=587
-MAIL_SMTP_USERNAME=your_email@qq.com
-MAIL_SMTP_PASSWORD=your_email_password
-```
+</details>
 
-### 🔐 OAuth配置（可选）
-```env
-GITHUB_CLIENT_ID=your_github_client_id
-GITHUB_CLIENT_SECRET=your_github_client_secret
-GITHUB_REDIRECT_URI=https://your-domain/oauth/github/callback
-```
-### ☁️ 对象存储配置（可选）
+<details>
+<summary><strong>☁️ 云服务配置</strong></summary>
+
 ```env
 # AWS S3
 S3_SECRET_ID=your_s3_access_key
 S3_SECRET_KEY=your_s3_secret_key
 S3_REGION=us-east-1
-S3_ENDPOINT=https://s3.amazonaws.com
 S3_BUCKET_NAME=your_bucket
-```
 
 
-
-### 💳 支付配置（可选）
-```env
-# 支付宝配置
-ALIPAY_APP_ID=your_alipay_app_id
-ALIPAY_PRIVATE_KEY=your_alipay_private_key
-ALIPAY_PUBLIC_KEY=your_alipay_public_key
-
-# Stripe配置
-STRIPE_SECRET_KEY=your_stripe_secret_key
-STRIPE_PUBLISHABLE_KEY=your_stripe_publishable_key
-```
-
-<details>
-<summary>查看完整环境变量列表</summary>
-
-包含高可用网关、向量数据库等更多配置选项，请查看完整的 `application.yml` 文件了解所有可配置参数。
 
 </details>
+
+<details>
+<summary><strong>📧 通知与认证</strong></summary>
+
+```env
+# 邮件服务
+MAIL_SMTP_HOST=smtp.qq.com
+MAIL_SMTP_USERNAME=your_email@qq.com
+MAIL_SMTP_PASSWORD=your_email_password
+
+# GitHub OAuth
+GITHUB_CLIENT_ID=your_github_client_id
+GITHUB_CLIENT_SECRET=your_github_client_secret
+
+# 支付服务
+ALIPAY_APP_ID=your_alipay_app_id
+STRIPE_SECRET_KEY=your_stripe_secret_key
+```
+
+</details>
+
+> 📋 **完整配置参考**：查看 [.env.example](/.env.example) 文件了解所有可配置参数
 
 
 
