@@ -58,8 +58,8 @@ docker run -d \
 |------|------|------|
 | **主应用** | http://localhost:3000 | 前端界面 |
 | **后端API** | http://localhost:8088 | API服务 |
-| **数据库** | localhost:5432 | PostgreSQL（可选） |
-| **RabbitMQ** | localhost:5672 | 消息队列（可选） |
+| **数据库** | http://localhost:5432 | PostgreSQL（可选） |
+| **RabbitMQ** | http://localhost:5672 | 消息队列（可选） |
 | **RabbitMQ管理** | http://localhost:15672 | 队列管理界面（可选） |
 
 #### 高可用网关（可选）
@@ -218,13 +218,23 @@ RABBITMQ_PASSWORD=your-mq-password
 <summary><strong>☁️ 云服务配置</strong></summary>
 
 ```env
+# 阿里云OSS
+OSS_ENDPOINT=https://oss-cn-beijing.aliyuncs.com
+OSS_ACCESS_KEY=your_access_key
+OSS_SECRET_KEY=your_secret_key
+OSS_BUCKET=your_bucket_name
+
 # AWS S3
 S3_SECRET_ID=your_s3_access_key
 S3_SECRET_KEY=your_s3_secret_key
 S3_REGION=us-east-1
 S3_BUCKET_NAME=your_bucket
 
-
+# AI服务
+SILICONFLOW_API_KEY=your_api_key
+HIGH_AVAILABILITY_ENABLED=true
+HIGH_AVAILABILITY_GATEWAY_URL=http://localhost:8081
+```
 
 </details>
 
