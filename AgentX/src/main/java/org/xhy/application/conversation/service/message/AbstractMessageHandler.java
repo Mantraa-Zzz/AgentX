@@ -16,6 +16,7 @@ import dev.langchain4j.store.memory.chat.InMemoryChatMemoryStore;
 import org.xhy.application.conversation.dto.AgentChatResponse;
 import org.xhy.application.conversation.service.handler.context.AgentPromptTemplates;
 import org.xhy.application.conversation.service.handler.context.ChatContext;
+import org.xhy.application.conversation.service.message.Agent;
 import org.xhy.application.conversation.service.message.agent.tool.RagToolManager;
 import org.xhy.domain.agent.model.AgentEntity;
 import org.xhy.domain.conversation.constant.MessageType;

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.xhy.application.conversation.dto.AgentChatResponse;
 import org.xhy.application.conversation.service.handler.context.ChatContext;
+import org.xhy.application.conversation.service.message.Agent;
 import org.xhy.application.conversation.service.message.agent.tool.RagToolManager;
 import org.xhy.application.conversation.service.message.rag.RagChatContext;
 import org.xhy.application.conversation.service.message.rag.RagRetrievalResult;
