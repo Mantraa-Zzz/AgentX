@@ -3,8 +3,7 @@ package org.xhy.application.conversation.service.message.rag;
 import org.xhy.application.conversation.service.handler.context.ChatContext;
 import org.xhy.application.rag.dto.RagSearchRequest;
 
-/** RAG专用的聊天上下文
- * 继承ChatContext，添加RAG特定的配置 */
+/** RAG专用的聊天上下文 继承ChatContext，添加RAG特定的配置 */
 public class RagChatContext extends ChatContext {
 
     /** RAG搜索请求配置 */
