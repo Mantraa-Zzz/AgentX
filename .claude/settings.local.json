@@ -50,7 +50,8 @@
       "Bash(npm install:*)",
       "Bash(wc:*)",
       "Bash(head:*)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(git mv:*)"
     ],
     "deny": []
   }
