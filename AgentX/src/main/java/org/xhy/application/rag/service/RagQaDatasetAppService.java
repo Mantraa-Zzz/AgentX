@@ -8,6 +8,7 @@ import dev.langchain4j.data.embedding.Embedding;
 import dev.langchain4j.model.embedding.EmbeddingModel;
 
 import java.util.Collections;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.dromara.streamquery.stream.core.stream.Steam;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -849,31 +850,33 @@ public class RagQaDatasetAppService {
      * @return SSE流式响应 */
     public SseEmitter ragStreamChat(RagStreamChatRequest request, String userId) {
         SseEmitter emitter = new SseEmitter(Long.MAX_VALUE);
+        AtomicBoolean completed = new AtomicBoolean(false);
 
         // 设置连接关闭回调
-        emitter.onCompletion(() -> log.info("RAG stream chat completed for user: {}", userId));
+        emitter.onCompletion(() -> {
+            completed.set(true);
+            log.info("RAG stream chat completed for user: {}", userId);
+        });
         emitter.onTimeout(() -> {
             log.warn("RAG stream chat timeout for user: {}", userId);
-            sendSseData(emitter, createErrorResponse("连接超时"));
+            sendSseData(emitter, createErrorResponse("连接超时"), completed);
+            safeCompleteEmitter(emitter, completed);
         });
         emitter.onError((ex) -> {
             log.error("RAG stream chat connection error for user: {}", userId, ex);
+            safeCompleteEmitter(emitter, completed);
         });
 
         // 异步处理流式问答
         CompletableFuture.runAsync(() -> {
             try {
-                processRagStreamChat(request, userId, emitter);
+                processRagStreamChat(request, userId, emitter, completed);
             } catch (Exception e) {
                 log.error("RAG stream chat error", e);
-                sendSseData(emitter, createErrorResponse("处理过程中发生错误: " + e.getMessage()));
+                sendSseData(emitter, createErrorResponse("处理过程中发生错误: " + e.getMessage()), completed);
             } finally {
                 // 确保连接被正确关闭
-                try {
-                    emitter.complete();
-                } catch (Exception e) {
-                    log.warn("Error completing SSE emitter", e);
-                }
+                safeCompleteEmitter(emitter, completed);
             }
         });
 
@@ -881,13 +884,14 @@ public class RagQaDatasetAppService {
     }
 
     /** 处理RAG流式问答的核心逻辑 */
-    private void processRagStreamChat(RagStreamChatRequest request, String userId, SseEmitter emitter) {
+    private void processRagStreamChat(RagStreamChatRequest request, String userId, SseEmitter emitter,
+            AtomicBoolean completed) {
         try {
             // 第一阶段：检索文档
             log.info("Starting RAG stream chat for user: {}, question: '{}'", userId, request.getQuestion());
 
             // 发送检索开始信号
-            sendSseData(emitter, AgentChatResponse.build("开始检索相关文档...", MessageType.RAG_RETRIEVAL_START));
+            sendSseData(emitter, AgentChatResponse.build("开始检索相关文档...", MessageType.RAG_RETRIEVAL_START), completed);
             Thread.sleep(500);
 
             // 确定检索范围
@@ -898,13 +902,15 @@ public class RagQaDatasetAppService {
                 FileDetailEntity fileEntity = fileDetailDomainService.getFileById(request.getFileId(), userId);
                 searchFileIds.add(request.getFileId());
                 searchDatasetIds.add(fileEntity.getDataSetId());
-                sendSseData(emitter, AgentChatResponse.build("正在指定文件中检索...", MessageType.RAG_RETRIEVAL_PROGRESS));
+                sendSseData(emitter, AgentChatResponse.build("正在指定文件中检索...", MessageType.RAG_RETRIEVAL_PROGRESS),
+                        completed);
             } else if (request.getDatasetIds() != null && !request.getDatasetIds().isEmpty()) {
                 for (String datasetId : request.getDatasetIds()) {
                     ragQaDatasetDomainService.checkDatasetExists(datasetId, userId);
                 }
                 searchDatasetIds.addAll(request.getDatasetIds());
-                sendSseData(emitter, AgentChatResponse.build("正在数据集中检索...", MessageType.RAG_RETRIEVAL_PROGRESS));
+                sendSseData(emitter, AgentChatResponse.build("正在数据集中检索...", MessageType.RAG_RETRIEVAL_PROGRESS),
+                        completed);
             } else {
                 throw new IllegalArgumentException("必须指定文件ID或数据集ID");
             }
@@ -942,11 +948,11 @@ public class RagQaDatasetAppService {
             } catch (Exception e) {
                 log.error("Failed to serialize retrieved documents", e);
             }
-            sendSseData(emitter, retrievalEndResponse);
+            sendSseData(emitter, retrievalEndResponse, completed);
             Thread.sleep(1000);
 
             // 第二阶段：生成回答
-            sendSseData(emitter, AgentChatResponse.build("开始生成回答...", MessageType.RAG_ANSWER_START));
+            sendSseData(emitter, AgentChatResponse.build("开始生成回答...", MessageType.RAG_ANSWER_START), completed);
             Thread.sleep(500);
 
             // 构建LLM上下文
@@ -954,16 +960,16 @@ public class RagQaDatasetAppService {
             String prompt = buildRagPrompt(request.getQuestion(), context);
 
             // 调用流式LLM - 使用同步等待确保流式处理完成
-            generateStreamAnswerAndWait(prompt, userId, emitter);
+            generateStreamAnswerAndWait(prompt, userId, emitter, completed);
 
             // 在LLM流式处理完成后发送完成信号
-            sendSseData(emitter, AgentChatResponse.buildEndMessage("回答生成完成", MessageType.RAG_ANSWER_END));
+            sendSseData(emitter, AgentChatResponse.buildEndMessage("回答生成完成", MessageType.RAG_ANSWER_END), completed);
 
         } catch (Exception e) {
             log.error("Error in RAG stream chat processing", e);
-            sendSseData(emitter, createErrorResponse("处理过程中发生错误: " + e.getMessage()));
+            sendSseData(emitter, createErrorResponse("处理过程中发生错误: " + e.getMessage()), completed);
         } finally {
-            emitter.complete();
+            safeCompleteEmitter(emitter, completed);
         }
     }
 
@@ -1018,8 +1024,10 @@ public class RagQaDatasetAppService {
     /** 生成流式回答并等待完成
      * @param prompt RAG提示词
      * @param userId 用户ID
-     * @param emitter SSE连接 */
-    private void generateStreamAnswerAndWait(String prompt, String userId, SseEmitter emitter) {
+     * @param emitter SSE连接
+     * @param completed 完成状态标志 */
+    private void generateStreamAnswerAndWait(String prompt, String userId, SseEmitter emitter,
+            AtomicBoolean completed) {
         try {
             log.info("开始生成RAG回答，用户: {}, 提示词长度: {}", userId, prompt.length());
 
@@ -1027,7 +1035,7 @@ public class RagQaDatasetAppService {
             String userDefaultModelId = userSettingsDomainService.getUserDefaultModelId(userId);
             if (userDefaultModelId == null) {
                 log.warn("用户 {} 未配置默认模型，使用临时简化响应", userId);
-                generateMockStreamAnswer(emitter);
+                generateMockStreamAnswer(emitter, completed);
                 return;
             }
 
@@ -1064,19 +1072,19 @@ public class RagQaDatasetAppService {
 
                 // 如果有思考过程但还没结束思考，先结束思考阶段
                 if (hasThinkingProcess[0] && !thinkingEnded[0]) {
-                    sendSseData(emitter, AgentChatResponse.build("思考完成", MessageType.RAG_THINKING_END));
+                    sendSseData(emitter, AgentChatResponse.build("思考完成", MessageType.RAG_THINKING_END), completed);
                     thinkingEnded[0] = true;
                 }
 
                 // 如果没有思考过程且还没开始过思考，先发送思考开始和结束
                 if (!hasThinkingProcess[0] && !thinkingStarted[0]) {
-                    sendSseData(emitter, AgentChatResponse.build("开始思考...", MessageType.RAG_THINKING_START));
-                    sendSseData(emitter, AgentChatResponse.build("思考完成", MessageType.RAG_THINKING_END));
+                    sendSseData(emitter, AgentChatResponse.build("开始思考...", MessageType.RAG_THINKING_START), completed);
+                    sendSseData(emitter, AgentChatResponse.build("思考完成", MessageType.RAG_THINKING_END), completed);
                     thinkingStarted[0] = true;
                     thinkingEnded[0] = true;
                 }
 
-                sendSseData(emitter, AgentChatResponse.build(fragment, MessageType.RAG_ANSWER_PROGRESS));
+                sendSseData(emitter, AgentChatResponse.build(fragment, MessageType.RAG_ANSWER_PROGRESS), completed);
             }).onPartialReasoning(reasoning -> {
 
                 // 标记有思考过程
@@ -1084,12 +1092,12 @@ public class RagQaDatasetAppService {
 
                 // 如果还没开始思考，发送思考开始
                 if (!thinkingStarted[0]) {
-                    sendSseData(emitter, AgentChatResponse.build("开始思考...", MessageType.RAG_THINKING_START));
+                    sendSseData(emitter, AgentChatResponse.build("开始思考...", MessageType.RAG_THINKING_START), completed);
                     thinkingStarted[0] = true;
                 }
 
                 // 发送思考进行中的状态（可选择是否发送思考内容）
-                sendSseData(emitter, AgentChatResponse.build(reasoning, MessageType.RAG_THINKING_PROGRESS));
+                sendSseData(emitter, AgentChatResponse.build(reasoning, MessageType.RAG_THINKING_PROGRESS), completed);
             }).onCompleteReasoning(completeReasoning -> {
                 log.info("思维链生成完成，长度: {}", completeReasoning.length());
                 log.info("完整思维链内容:\n{}", completeReasoning);
@@ -1106,7 +1114,7 @@ public class RagQaDatasetAppService {
                 streamComplete.complete(null);
             }).onError(throwable -> {
                 log.error("RAG stream answer generation error for user: {}", userId, throwable);
-                sendSseData(emitter, createErrorResponse("回答生成失败: " + throwable.getMessage()));
+                sendSseData(emitter, createErrorResponse("回答生成失败: " + throwable.getMessage()), completed);
 
                 long latency = System.currentTimeMillis() - startTime;
                 highAvailabilityDomainService.reportCallResult(result.getInstanceId(), selectedModel.getId(), false,
@@ -1123,19 +1131,19 @@ public class RagQaDatasetAppService {
                 streamComplete.get(30, java.util.concurrent.TimeUnit.MINUTES);
             } catch (java.util.concurrent.TimeoutException e) {
                 log.warn("LLM流式响应超时，用户: {}", userId);
-                sendSseData(emitter, createErrorResponse("响应超时"));
+                sendSseData(emitter, createErrorResponse("响应超时"), completed);
             } catch (Exception e) {
                 log.error("等待LLM流式响应时发生错误，用户: {}", userId, e);
             }
 
         } catch (Exception e) {
             log.error("Error in RAG stream answer generation for user: {}", userId, e);
-            sendSseData(emitter, createErrorResponse("回答生成失败: " + e.getMessage()));
+            sendSseData(emitter, createErrorResponse("回答生成失败: " + e.getMessage()), completed);
         }
     }
 
     /** 生成模拟流式回答（备用方案） */
-    private void generateMockStreamAnswer(SseEmitter emitter) {
+    private void generateMockStreamAnswer(SseEmitter emitter, AtomicBoolean completed) {
         try {
             // 模拟流式回答生成
             String[] responseFragments = {"根据检索到的文档内容，", "我可以为您提供以下回答：\n\n", "这是基于文档内容生成的回答。", "\n\n如需更详细的信息，",
@@ -1146,7 +1154,7 @@ public class RagQaDatasetAppService {
 
             for (String fragment : responseFragments) {
                 fullMockAnswer.append(fragment);
-                sendSseData(emitter, AgentChatResponse.build(fragment, MessageType.RAG_ANSWER_PROGRESS));
+                sendSseData(emitter, AgentChatResponse.build(fragment, MessageType.RAG_ANSWER_PROGRESS), completed);
                 Thread.sleep(200);
             }
 
@@ -1154,7 +1162,7 @@ public class RagQaDatasetAppService {
 
         } catch (Exception e) {
             log.error("Error generating mock stream answer", e);
-            sendSseData(emitter, createErrorResponse("回答生成失败: " + e.getMessage()));
+            sendSseData(emitter, createErrorResponse("回答生成失败: " + e.getMessage()), completed);
         }
     }
 
@@ -1183,7 +1191,38 @@ public class RagQaDatasetAppService {
         return AiServices.builder(Agent.class).streamingChatModel(streamingClient).chatMemory(memory).build();
     }
 
+    /** 安全地完成SseEmitter，避免重复完成错误 */
+    private void safeCompleteEmitter(SseEmitter emitter, AtomicBoolean completed) {
+        if (completed.compareAndSet(false, true)) {
+            try {
+                emitter.complete();
+                log.debug("SSE emitter completed successfully");
+            } catch (Exception e) {
+                log.debug("Error completing SSE emitter (may be already completed): {}", e.getMessage());
+            }
+        } else {
+            log.debug("SSE emitter already completed, skipping");
+        }
+    }
+
     /** 发送SSE数据（带状态检查） */
+    private void sendSseData(SseEmitter emitter, AgentChatResponse response, AtomicBoolean completed) {
+        // 检查连接是否已经完成
+        if (completed.get()) {
+            return;
+        }
+
+        try {
+            String jsonData = objectMapper.writeValueAsString(response);
+            emitter.send(SseEmitter.event().data(jsonData));
+        } catch (Exception e) {
+            log.error("发送SSE数据失败", e);
+            // 如果发送失败，标记为已完成避免后续操作
+            safeCompleteEmitter(emitter, completed);
+        }
+    }
+
+    /** 发送SSE数据（向后兼容方法） */
     private void sendSseData(SseEmitter emitter, AgentChatResponse response) {
         try {
             String jsonData = objectMapper.writeValueAsString(response);
@@ -1266,32 +1305,33 @@ public class RagQaDatasetAppService {
      * @return SSE流式响应 */
     public SseEmitter ragStreamChatByUserRag(RagStreamChatRequest request, String userRagId, String userId) {
         SseEmitter emitter = new SseEmitter(Long.MAX_VALUE);
+        AtomicBoolean completed = new AtomicBoolean(false);
 
         // 设置连接关闭回调
-        emitter.onCompletion(
-                () -> log.info("RAG stream chat by userRag completed for user: {}, userRagId: {}", userId, userRagId));
+        emitter.onCompletion(() -> {
+            completed.set(true);
+            log.info("RAG stream chat by userRag completed for user: {}, userRagId: {}", userId, userRagId);
+        });
         emitter.onTimeout(() -> {
             log.warn("RAG stream chat by userRag timeout for user: {}, userRagId: {}", userId, userRagId);
-            sendSseData(emitter, createErrorResponse("连接超时"));
+            sendSseData(emitter, createErrorResponse("连接超时"), completed);
+            safeCompleteEmitter(emitter, completed);
         });
         emitter.onError((ex) -> {
             log.error("RAG stream chat by userRag connection error for user: {}, userRagId: {}", userId, userRagId, ex);
+            safeCompleteEmitter(emitter, completed);
         });
 
         // 异步处理流式问答
         CompletableFuture.runAsync(() -> {
             try {
-                processRagStreamChatByUserRag(request, userRagId, userId, emitter);
+                processRagStreamChatByUserRag(request, userRagId, userId, emitter, completed);
             } catch (Exception e) {
                 log.error("RAG stream chat by userRag error", e);
-                sendSseData(emitter, createErrorResponse("处理过程中发生错误: " + e.getMessage()));
+                sendSseData(emitter, createErrorResponse("处理过程中发生错误: " + e.getMessage()), completed);
             } finally {
                 // 确保连接被正确关闭
-                try {
-                    emitter.complete();
-                } catch (Exception e) {
-                    log.warn("Error completing SSE emitter", e);
-                }
+                safeCompleteEmitter(emitter, completed);
             }
         });
 
@@ -1300,11 +1340,11 @@ public class RagQaDatasetAppService {
 
     /** 处理基于用户RAG的流式问答核心逻辑 */
     private void processRagStreamChatByUserRag(RagStreamChatRequest request, String userRagId, String userId,
-            SseEmitter emitter) {
+            SseEmitter emitter, AtomicBoolean completed) {
         try {
             // 检查用户RAG是否存在和有权限访问
             if (!ragDataAccessService.canAccessRag(userId, userRagId)) {
-                sendSseData(emitter, createErrorResponse("处理过程中发生错误: 数据集不存在"));
+                sendSseData(emitter, createErrorResponse("处理过程中发生错误: 数据集不存在"), completed);
                 return;
             }
 
@@ -1314,7 +1354,7 @@ public class RagQaDatasetAppService {
                     userId, request.getQuestion(), dataSourceInfo.getInstallType());
 
             // 第一阶段：检索文档
-            sendSseData(emitter, AgentChatResponse.build("开始检索相关文档...", MessageType.RAG_RETRIEVAL_START));
+            sendSseData(emitter, AgentChatResponse.build("开始检索相关文档...", MessageType.RAG_RETRIEVAL_START), completed);
             Thread.sleep(500);
 
             // 获取用户的嵌入模型配置
@@ -1376,12 +1416,12 @@ public class RagQaDatasetAppService {
             } catch (Exception e) {
                 log.error("Failed to serialize retrieved documents", e);
             }
-            sendSseData(emitter, retrievalEndResponse);
+            sendSseData(emitter, retrievalEndResponse, completed);
 
             Thread.sleep(500);
 
             // 第二阶段：生成回答
-            sendSseData(emitter, AgentChatResponse.build("开始生成回答...", MessageType.RAG_ANSWER_START));
+            sendSseData(emitter, AgentChatResponse.build("开始生成回答...", MessageType.RAG_ANSWER_START), completed);
             Thread.sleep(500);
 
             // 构建LLM上下文
@@ -1389,14 +1429,14 @@ public class RagQaDatasetAppService {
             String prompt = buildRagPrompt(request.getQuestion(), context);
 
             // 调用流式LLM - 使用同步等待确保流式处理完成
-            generateStreamAnswerAndWait(prompt, userId, emitter);
+            generateStreamAnswerAndWait(prompt, userId, emitter, completed);
 
             // 在LLM流式处理完成后发送完成信号
-            sendSseData(emitter, AgentChatResponse.buildEndMessage("回答生成完成", MessageType.RAG_ANSWER_END));
+            sendSseData(emitter, AgentChatResponse.buildEndMessage("回答生成完成", MessageType.RAG_ANSWER_END), completed);
 
         } catch (Exception e) {
             log.error("Error in processRagStreamChatByUserRag", e);
-            sendSseData(emitter, createErrorResponse("处理过程中发生错误: " + e.getMessage()));
+            sendSseData(emitter, createErrorResponse("处理过程中发生错误: " + e.getMessage()), completed);
         }
     }
 
