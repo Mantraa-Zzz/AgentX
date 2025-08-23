@@ -72,7 +72,6 @@ public class RAGSearchAppService {
     private final RagQaDatasetDomainService ragQaDatasetDomainService;
     private final FileDetailDomainService fileDetailDomainService;
     private final DocumentUnitDomainService documentUnitDomainService;
-    private final EmbeddingDomainService embeddingDomainService;
     private final ObjectMapper objectMapper;
     private final LLMServiceFactory llmServiceFactory;
     private final LLMDomainService llmDomainService;
@@ -84,22 +83,20 @@ public class RAGSearchAppService {
     private final RagModelConfigService ragModelConfigService;
     private final EmbeddingModelFactory embeddingModelFactory;
     private final HybridSearchDomainService hybridSearchDomainService;
-    private final UserModelConfigResolver userModelConfigResolver;
     private final UserRagFileDomainService userRagFileDomainService;
     public RAGSearchAppService(RagQaDatasetDomainService ragQaDatasetDomainService,
                                FileDetailDomainService fileDetailDomainService, DocumentUnitDomainService documentUnitDomainService,
-                               EmbeddingDomainService embeddingDomainService, ObjectMapper objectMapper,
+                               ObjectMapper objectMapper,
                                LLMServiceFactory llmServiceFactory, LLMDomainService llmDomainService,
                                UserSettingsDomainService userSettingsDomainService,
                                HighAvailabilityDomainService highAvailabilityDomainService,
                                UserRagDomainService userRagDomainService, RagDataAccessDomainService ragDataAccessService,
                                RagModelConfigService ragModelConfigService, EmbeddingModelFactory embeddingModelFactory,
                                HybridSearchDomainService hybridSearchDomainService,
-                               org.xhy.infrastructure.rag.service.UserModelConfigResolver userModelConfigResolver, UserRagFileDomainService userRagFileDomainService) {
+                                UserRagFileDomainService userRagFileDomainService) {
         this.ragQaDatasetDomainService = ragQaDatasetDomainService;
         this.fileDetailDomainService = fileDetailDomainService;
         this.documentUnitDomainService = documentUnitDomainService;
-        this.embeddingDomainService = embeddingDomainService;
         this.objectMapper = objectMapper;
         this.llmServiceFactory = llmServiceFactory;
         this.llmDomainService = llmDomainService;
@@ -110,7 +107,6 @@ public class RAGSearchAppService {
         this.ragModelConfigService = ragModelConfigService;
         this.embeddingModelFactory = embeddingModelFactory;
         this.hybridSearchDomainService = hybridSearchDomainService;
-        this.userModelConfigResolver = userModelConfigResolver;
         this.userRagFileDomainService = userRagFileDomainService;
     }
 
