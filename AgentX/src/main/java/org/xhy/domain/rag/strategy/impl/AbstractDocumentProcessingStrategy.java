@@ -12,28 +12,28 @@ public abstract class AbstractDocumentProcessingStrategy implements DocumentProc
     private static final Logger LOG = LoggerFactory.getLogger(AbstractDocumentProcessingStrategy.class);
 
     /** 处理消息
-     * @param ragDocSyncOcrMessage 消息数据
+     * @param ragDocMessage 消息数据
      * @param strategy 当前策略 */
     @Override
-    public void handle(RagDocMessage ragDocSyncOcrMessage, String strategy) throws Exception {
+    public void handle(RagDocMessage ragDocMessage, String strategy) throws Exception {
 
-        final byte[] fileData = getFileData(ragDocSyncOcrMessage, strategy);
-        pushPageSize(fileData, ragDocSyncOcrMessage);
+        final byte[] fileData = getFileData(ragDocMessage, strategy);
+        pushPageSize(fileData, ragDocMessage);
         if (fileData == null) {
             LOG.error("File data is empty");
             return;
         }
 
-        Integer pageSize = ragDocSyncOcrMessage.getPageSize();
+        Integer pageSize = ragDocMessage.getPageSize();
         if (pageSize == null) {
             LOG.warn("Page size is null, using default value 1 for txt/word files");
             pageSize = 1;
         }
-        final Map<Integer, String> ocrData = processFile(fileData, pageSize, ragDocSyncOcrMessage);
+        final Map<Integer, String> data = processFile(fileData, pageSize, ragDocMessage);
 
-        LOG.info("Successfully retrieved {} pages of data from the current file", ocrData.size());
+        LOG.info("Successfully retrieved {} pages of data from the current file", data.size());
 
-        insertData(ragDocSyncOcrMessage, ocrData);
+        insertData(ragDocMessage, data);
 
     };
 

@@ -14,7 +14,6 @@ import org.dromara.x.file.storage.core.FileStorageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.xhy.domain.rag.constant.RAGSystemPrompt;
 import org.xhy.domain.rag.message.RagDocMessage;
 import org.xhy.domain.rag.model.DocumentUnitEntity;
 import org.xhy.domain.rag.model.FileDetailEntity;
@@ -29,9 +28,9 @@ import dev.langchain4j.data.segment.TextSegment;
 import jakarta.annotation.Resource;
 
 @Service("word")
-public class WORDDocumentProcessingStrategy extends AbstractDocumentProcessingStrategy implements RAGSystemPrompt {
+public class WORDDocumentProcessing extends AbstractDocumentProcessingStrategy {
 
-    private static final Logger log = LoggerFactory.getLogger(WORDDocumentProcessingStrategy.class);
+    private static final Logger log = LoggerFactory.getLogger(WORDDocumentProcessing.class);
 
     private final DocumentUnitRepository documentUnitRepository;
 
@@ -43,30 +42,30 @@ public class WORDDocumentProcessingStrategy extends AbstractDocumentProcessingSt
     // 用于存储当前处理的文件ID，以便更新页数
     private String currentProcessingFileId;
 
-    public WORDDocumentProcessingStrategy(DocumentUnitRepository documentUnitRepository,
+    public WORDDocumentProcessing(DocumentUnitRepository documentUnitRepository,
             FileDetailRepository fileDetailRepository) {
         this.documentUnitRepository = documentUnitRepository;
         this.fileDetailRepository = fileDetailRepository;
     }
 
     /** 处理消息，设置当前处理的文件ID
-     * @param ragDocSyncOcrMessage 消息数据
+     * @param ragDocMessage 消息数据
      * @param strategy 当前策略 */
     @Override
-    public void handle(RagDocMessage ragDocSyncOcrMessage, String strategy) throws Exception {
+    public void handle(RagDocMessage ragDocMessage, String strategy) throws Exception {
         // 设置当前处理的文件ID，用于更新页数
-        this.currentProcessingFileId = ragDocSyncOcrMessage.getFileId();
+        this.currentProcessingFileId = ragDocMessage.getFileId();
 
         // 调用父类处理逻辑
-        super.handle(ragDocSyncOcrMessage, strategy);
+        super.handle(ragDocMessage, strategy);
     }
 
     /** 获取文件页数
      *
      * @param bytes Word文档字节数组
-     * @param ragDocSyncOcrMessage 消息数据 */
+     * @param ragDocMessage 消息数据 */
     @Override
-    public void pushPageSize(byte[] bytes, RagDocMessage ragDocSyncOcrMessage) {
+    public void pushPageSize(byte[] bytes, RagDocMessage ragDocMessage) {
         try {
             DocumentParser parser = new ApachePoiDocumentParser();
             InputStream inputStream = new ByteArrayInputStream(bytes);
@@ -76,7 +75,7 @@ public class WORDDocumentProcessingStrategy extends AbstractDocumentProcessingSt
             final List<TextSegment> split = documentByCharacterSplitter.split(document);
 
             int segmentCount = split.size();
-            ragDocSyncOcrMessage.setPageSize(segmentCount);
+            ragDocMessage.setPageSize(segmentCount);
             log.info("Word document split into {} segments", segmentCount);
 
             // 更新数据库中的总页数
@@ -92,7 +91,7 @@ public class WORDDocumentProcessingStrategy extends AbstractDocumentProcessingSt
             inputStream.close();
         } catch (Exception e) {
             log.error("Failed to calculate page size for Word document", e);
-            ragDocSyncOcrMessage.setPageSize(0);
+            ragDocMessage.setPageSize(0);
         }
     }
 

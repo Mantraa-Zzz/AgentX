@@ -28,9 +28,9 @@ import dev.langchain4j.data.segment.TextSegment;
 import jakarta.annotation.Resource;
 
 @Service("txt")
-public class TXTRagDocSyncOcrStrategyImpl extends AbstractDocumentProcessingStrategy {
+public class TXTRagDocDocumentProcessing extends AbstractDocumentProcessingStrategy {
 
-    private static final Logger log = LoggerFactory.getLogger(TXTRagDocSyncOcrStrategyImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(TXTRagDocDocumentProcessing.class);
 
     private final DocumentUnitRepository documentUnitRepository;
 
@@ -42,22 +42,22 @@ public class TXTRagDocSyncOcrStrategyImpl extends AbstractDocumentProcessingStra
     // 用于存储当前处理的文件ID，以便更新页数
     private String currentProcessingFileId;
 
-    public TXTRagDocSyncOcrStrategyImpl(DocumentUnitRepository documentUnitRepository,
+    public TXTRagDocDocumentProcessing(DocumentUnitRepository documentUnitRepository,
             FileDetailRepository fileDetailRepository) {
         this.documentUnitRepository = documentUnitRepository;
         this.fileDetailRepository = fileDetailRepository;
     }
 
     /** 处理消息，设置当前处理的文件ID
-     * @param ragDocSyncOcrMessage 消息数据
+     * @param ragDocMessage 消息数据
      * @param strategy 当前策略 */
     @Override
-    public void handle(RagDocMessage ragDocSyncOcrMessage, String strategy) throws Exception {
+    public void handle(RagDocMessage ragDocMessage, String strategy) throws Exception {
         // 设置当前处理的文件ID，用于更新页数
-        this.currentProcessingFileId = ragDocSyncOcrMessage.getFileId();
+        this.currentProcessingFileId = ragDocMessage.getFileId();
 
         // 调用父类处理逻辑
-        super.handle(ragDocSyncOcrMessage, strategy);
+        super.handle(ragDocMessage, strategy);
     }
 
     /** 获取文件页数
