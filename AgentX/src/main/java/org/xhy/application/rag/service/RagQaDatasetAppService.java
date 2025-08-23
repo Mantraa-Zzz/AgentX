@@ -96,6 +96,7 @@ public class RagQaDatasetAppService {
     private final EmbeddingModelFactory embeddingModelFactory;
     private final UserRagFileRepository userRagFileRepository;
     private final HybridSearchDomainService hybridSearchDomainService;
+    private final org.xhy.infrastructure.rag.service.UserModelConfigResolver userModelConfigResolver;
 
     public RagQaDatasetAppService(RagQaDatasetDomainService ragQaDatasetDomainService,
             FileDetailDomainService fileDetailDomainService, DocumentUnitRepository documentUnitRepository,
@@ -107,7 +108,8 @@ public class RagQaDatasetAppService {
             RagMarketAppService ragMarketAppService, RagVersionDomainService ragVersionDomainService,
             UserRagDomainService userRagDomainService, RagDataAccessDomainService ragDataAccessService,
             RagModelConfigService ragModelConfigService, EmbeddingModelFactory embeddingModelFactory,
-            UserRagFileRepository userRagFileRepository, HybridSearchDomainService hybridSearchDomainService) {
+            UserRagFileRepository userRagFileRepository, HybridSearchDomainService hybridSearchDomainService,
+            org.xhy.infrastructure.rag.service.UserModelConfigResolver userModelConfigResolver) {
         this.ragQaDatasetDomainService = ragQaDatasetDomainService;
         this.fileDetailDomainService = fileDetailDomainService;
         this.documentUnitRepository = documentUnitRepository;
@@ -128,6 +130,7 @@ public class RagQaDatasetAppService {
         this.embeddingModelFactory = embeddingModelFactory;
         this.userRagFileRepository = userRagFileRepository;
         this.hybridSearchDomainService = hybridSearchDomainService;
+        this.userModelConfigResolver = userModelConfigResolver;
     }
 
     /** 创建数据集
@@ -779,12 +782,23 @@ public class RagQaDatasetAppService {
         ModelConfig embeddingModelConfig = ragModelConfigService.getUserEmbeddingModelConfig(userId);
         EmbeddingModelFactory.EmbeddingConfig embeddingConfig = toEmbeddingConfig(embeddingModelConfig);
 
+        // 获取用户的聊天模型配置用于HyDE
+        ModelConfig chatModelConfig = null;
+        try {
+            // 使用UserModelConfigResolver获取聊天模型配置
+            chatModelConfig = userModelConfigResolver.getUserChatModelConfig(userId);
+            log.debug("获取用户 {} 的聊天模型配置成功，modelId: {}", userId, chatModelConfig.getModelId());
+        } catch (Exception e) {
+            log.warn("获取用户 {} 的聊天模型配置失败，HyDE功能将不可用: {}", userId, e.getMessage());
+        }
+
         // 使用HybridSearchConfig配置对象调用混合检索服务
         HybridSearchConfig config = HybridSearchConfig.builder(validDatasetIds, request.getQuestion())
                 .maxResults(request.getMaxResults()).minScore(adjustedMinScore) // 使用智能调整的相似度阈值
                 .enableRerank(request.getEnableRerank()).candidateMultiplier(adjustedCandidateMultiplier) // 使用智能调整的候选结果倍数
                 .embeddingConfig(embeddingConfig) // 传入嵌入模型配置
                 .enableQueryExpansion(request.getEnableQueryExpansion()) // 传递查询扩展参数
+                .chatModelConfig(chatModelConfig) // 传入聊天模型配置（用于HyDE）
                 .build();
         List<DocumentUnitEntity> entities = hybridSearchDomainService.hybridSearch(config);
 
@@ -828,13 +842,25 @@ public class RagQaDatasetAppService {
         ModelConfig embeddingModelConfig = ragModelConfigService.getUserEmbeddingModelConfig(userId);
         EmbeddingModelFactory.EmbeddingConfig embeddingConfig = toEmbeddingConfig(embeddingModelConfig);
 
+        // 获取用户的聊天模型配置用于HyDE
+        ModelConfig chatModelConfig = null;
+        try {
+            // 使用UserModelConfigResolver获取聊天模型配置
+            chatModelConfig = userModelConfigResolver.getUserChatModelConfig(userId);
+            log.debug("ragSearchByUserRag - 获取用户 {} 的聊天模型配置成功，modelId: {}", userId, chatModelConfig.getModelId());
+        } catch (Exception e) {
+            log.warn("ragSearchByUserRag - 获取用户 {} 的聊天模型配置失败，HyDE功能将不可用: {}", userId, e.getMessage());
+        }
+
         List<DocumentUnitEntity> entities;
         if (sourceInfo.getIsRealTime()) {
             // REFERENCE类型：使用混合检索搜索实时数据
             HybridSearchConfig config = HybridSearchConfig.builder(List.of(actualDatasetId), request.getQuestion())
                     .maxResults(request.getMaxResults()).minScore(adjustedMinScore)
                     .enableRerank(request.getEnableRerank()).candidateMultiplier(adjustedCandidateMultiplier)
-                    .embeddingConfig(embeddingConfig).enableQueryExpansion(request.getEnableQueryExpansion()).build();
+                    .embeddingConfig(embeddingConfig).enableQueryExpansion(request.getEnableQueryExpansion())
+                    .chatModelConfig(chatModelConfig) // 传入聊天模型配置（用于HyDE）
+                    .build();
             entities = hybridSearchDomainService.hybridSearch(config);
         } else {
             // SNAPSHOT类型：搜索版本快照数据，使用混合检索
@@ -843,7 +869,9 @@ public class RagQaDatasetAppService {
             HybridSearchConfig config = HybridSearchConfig.builder(List.of(actualDatasetId), request.getQuestion())
                     .maxResults(request.getMaxResults()).minScore(adjustedMinScore)
                     .enableRerank(request.getEnableRerank()).candidateMultiplier(adjustedCandidateMultiplier)
-                    .embeddingConfig(embeddingConfig).enableQueryExpansion(request.getEnableQueryExpansion()).build();
+                    .embeddingConfig(embeddingConfig).enableQueryExpansion(request.getEnableQueryExpansion())
+                    .chatModelConfig(chatModelConfig) // 传入聊天模型配置（用于HyDE）
+                    .build();
             entities = hybridSearchDomainService.hybridSearch(config);
         }
 
