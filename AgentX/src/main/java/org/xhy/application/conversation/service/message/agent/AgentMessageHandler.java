@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.xhy.application.conversation.service.handler.context.ChatContext;
 import org.xhy.application.conversation.service.message.AbstractMessageHandler;
 import org.xhy.application.conversation.service.message.TracingMessageHandler;
-import org.xhy.application.conversation.service.message.agent.tool.RagToolManager;
+import org.xhy.application.conversation.service.message.builtin.BuiltInToolRegistry;
 import org.xhy.application.conversation.service.ChatSessionManager;
 import org.xhy.application.trace.collector.TraceCollector;
 import org.xhy.domain.conversation.service.MessageDomainService;
@@ -29,10 +29,11 @@ public class AgentMessageHandler extends TracingMessageHandler {
     public AgentMessageHandler(LLMServiceFactory llmServiceFactory, MessageDomainService messageDomainService,
             HighAvailabilityDomainService highAvailabilityDomainService, SessionDomainService sessionDomainService,
             UserSettingsDomainService userSettingsDomainService, LLMDomainService llmDomainService,
-            RagToolManager ragToolManager, BillingService billingService, AccountDomainService accountDomainService,
-            ChatSessionManager chatSessionManager, TraceCollector traceCollector, AgentToolManager agentToolManager) {
+            BuiltInToolRegistry builtInToolRegistry, BillingService billingService,
+            AccountDomainService accountDomainService, ChatSessionManager chatSessionManager,
+            TraceCollector traceCollector, AgentToolManager agentToolManager) {
         super(llmServiceFactory, messageDomainService, highAvailabilityDomainService, sessionDomainService,
-                userSettingsDomainService, llmDomainService, ragToolManager, billingService, accountDomainService,
+                userSettingsDomainService, llmDomainService, builtInToolRegistry, billingService, accountDomainService,
                 chatSessionManager, traceCollector);
         this.agentToolManager = agentToolManager;
     }
