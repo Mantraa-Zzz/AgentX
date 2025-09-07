@@ -47,6 +47,7 @@ docker run -d \
   --env-file .env \
   -v agentx-data:/var/lib/postgresql/data \
   -v agentx-storage:/app/storage \
+  -v /var/run/docker.sock:/var/run/docker.sock\
   ghcr.nju.edu.cn/lucky-aeon/agentx:latest
 ```
 
