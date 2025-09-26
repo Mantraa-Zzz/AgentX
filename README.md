@@ -1,20 +1,147 @@
 # AgentX - 智能对话系统平台
 
-[](https://opensource.org/licenses/MIT)
 
 AgentX 是一个基于大模型 (LLM) 和多能力平台 (MCP) 的智能 Agent 构建平台。它致力于简化 Agent 的创建流程，让用户无需复杂的流程节点或拖拽操作，仅通过自然语言和工具集成即可打造个性化的智能 Agent。
 
-## 🔗 相关链接
+## 🚀 功能介绍
 
-### 📦 子仓库
-- 🛡️ **高可用网关**: [API-Premium-Gateway](https://github.com/lucky-aeon/API-Premium-Gateway) - 模型高可用组件
-- 🌐 **MCP网关**: [mcp-gateway](https://github.com/lucky-aeon/mcp-gateway) - MCP服务统一管理
-- 🏪 **MCP社区**: [agent-mcp-community](https://github.com/lucky-aeon/agent-mcp-community) - MCP Server 开源社区
+### 🤖 Agent 创建与管理
 
-### 📚 学习资源
-- 🎥 **项目教程**: [B站视频教程](https://www.bilibili.com/video/BV1qaTWzPERJ/?spm_id_from=333.1387.homepage.video_card.click)
-- 📖 **详细教学**: [敲鸭社区 - code.xhyovo.cn](https://code.xhyovo.cn/)
-- 🎯 **项目演示**: [在线PPT介绍](https://needless-comparison.surge.sh)
+AgentX 提供了直观易用的 Agent 创建界面，让您能够快速构建个性化的智能助手。
+
+#### 📝 Agent 创建流程
+
+1. **登录系统**
+   - 访问 http://localhost:3000
+   - 使用管理员账号登录：`admin@agentx.ai` / `admin123`
+
+2. **创建新 Agent**
+   - 点击"创建 Agent"按钮
+   - 填写 Agent 基本信息：
+     - 名称：为您的 Agent 起一个有意义的名字
+     - 描述：详细描述 Agent 的功能和用途
+     - 头像：上传或选择 Agent 的头像
+
+3. **配置 Agent 能力**
+   - 选择大模型：支持多种 LLM 服务商
+   - 设置上下文管理：配置对话历史长度和摘要策略
+   - 添加工具：从工具市场选择所需的功能工具
+   - 配置 MCP 策略：设置 Agent 的行为模式
+
+4. **发布与测试**
+   - 保存配置并发布 Agent
+   - 在测试环境中验证 Agent 功能
+   - 调整参数优化性能
+
+![Agent 创建界面](docs/images/agent创建.png)
+
+#### 🔧 Agent 管理功能
+
+- **版本管理**：支持 Agent 的版本控制和回滚
+- **性能监控**：实时监控 Agent 的使用情况和响应时间
+- **用户反馈**：收集用户使用反馈，持续优化 Agent
+- **A/B 测试**：支持不同版本的 Agent 进行对比测试
+
+
+
+#### 📊 管理工具特色
+
+- **可视化仪表板**：直观展示系统运行状态
+- **实时监控**：24/7 系统状态监控
+- **智能告警**：异常情况自动通知
+- **批量操作**：支持批量用户和内容管理
+- **权限分级**：细粒度的权限控制
+
+### 🛠️ 工具创建与管理
+
+AgentX 提供了强大的工具创建和管理功能，让您能够构建和集成各种功能工具。
+
+#### 🔧 工具创建流程
+
+1. **工具设计**
+   - 定义工具名称和功能描述
+   - 设置工具类型和分类
+   - 配置工具图标和标签
+
+2. **功能实现**
+   - 编写工具逻辑代码
+   - 定义输入输出参数
+   - 设置错误处理和验证
+
+3. **测试验证**
+   - 单元测试和集成测试
+   - 性能测试和压力测试
+   - 安全测试和权限验证
+
+4. **发布部署**
+   - 工具审核和发布
+   - 版本管理和更新
+   - 使用统计和反馈收集
+
+![工具创建界面](docs/images/工具创建.png)
+
+#### 🎯 工具管理特色
+
+- **可视化编辑器**：拖拽式工具构建界面
+- **模板库**：丰富的工具模板和示例
+- **版本控制**：支持工具的版本管理和回滚
+- **权限管理**：细粒度的工具访问权限控制
+- **性能监控**：实时监控工具的使用性能
+
+### 📚 知识库搭建
+
+AgentX 的知识库系统让您能够构建专业的知识体系，为 Agent 提供强大的知识支持。
+
+#### 🏗️ 知识库构建流程
+
+1. **知识收集**
+   - 文档上传和导入
+   - 网页内容抓取
+   - 数据库连接和同步
+   - 实时数据流接入
+
+2. **知识处理**
+   - 智能文档解析
+   - 内容分块和向量化
+   - 关键词提取和标签
+   - 知识图谱构建
+
+3. **知识组织**
+   - 分类体系和标签管理
+   - 知识关联和推理
+   - 多语言支持
+   - 知识更新和维护
+
+4. **智能检索**
+   - 语义搜索和相似度匹配
+   - 多模态检索支持
+   - 个性化推荐
+   - 实时知识问答
+
+![知识库搭建界面](docs/images/知识库搭建.png)
+
+#### 🧠 知识库核心特性
+
+- **多格式支持**：PDF、Word、Excel、PPT、HTML等
+- **智能解析**：自动识别文档结构和内容
+- **向量检索**：基于语义的智能搜索
+- **知识图谱**：构建知识间的关联关系
+- **实时更新**：支持知识的动态更新和同步
+
+### 🛠️ 核心功能特性
+
+- **🔧 Agent 管理**：创建、编辑、发布、监控智能 Agent
+- **🧠 LLM 集成**：支持多种大语言模型服务商
+- **🔌 MCP 支持**：多能力平台集成，扩展 Agent 功能
+- **📚 RAG 系统**：知识检索增强生成
+- **💰 计费系统**：灵活的计费策略和支付集成
+- **📈 监控分析**：全面的使用统计和性能分析
+- **🌐 API 开放**：提供完整的 RESTful API
+- **🔒 安全防护**：多层次的安全保障机制
+- **🛠️ 工具开发**：可视化工具创建和集成平台
+- **📚 知识管理**：智能知识库构建和检索系统
+- **🔗 工作流编排**：灵活的任务流程设计和执行
+
 
 ## 🚀 快速开始
 
@@ -26,7 +153,7 @@ AgentX 是一个基于大模型 (LLM) 和多能力平台 (MCP) 的智能 Agent �
 
 ```bash
 # 下载配置文件模板
-curl -O https://raw.githubusercontent.com/lucky-aeon/AgentX/master/.env.example
+curl -O https://raw.githubusercontent.com/Mantraa-Zzz/AgentX/main/.env.example
 # 复制并编辑配置
 cp .env.example .env
 # 根据需要修改 .env 文件中的配置
@@ -47,7 +174,6 @@ docker run -d \
   --env-file .env \
   -v agentx-data:/var/lib/postgresql/data \
   -v agentx-storage:/app/storage \
-  -v /var/run/docker.sock:/var/run/docker.sock\
   ghcr.nju.edu.cn/lucky-aeon/agentx:latest
 ```
 
@@ -77,6 +203,43 @@ docker run -d \
 **默认登录账号**：
 - 管理员：`admin@agentx.ai` / `admin123`
 - 测试用户：`test@agentx.ai` / `test123`
+
+### 🎯 快速开始使用
+
+#### 第一步：登录系统
+1. 打开浏览器访问：http://localhost:3000
+2. 使用管理员账号登录：`admin@agentx.ai` / `admin123`
+
+#### 第二步：创建您的第一个 Agent
+1. 点击"创建 Agent"按钮
+2. 填写 Agent 基本信息（名称、描述、头像）
+3. 选择合适的大语言模型
+4. 配置 Agent 的能力和工具
+5. 保存并发布 Agent
+
+#### 第三步：测试和使用
+1. 在 Agent 列表中查看您创建的 Agent
+2. 点击"测试"按钮进行功能验证
+3. 根据测试结果调整 Agent 配置
+4. 发布正式版本供用户使用
+
+#### 第四步：管理监控
+1. 使用管理员界面监控系统状态
+2. 查看用户使用情况和统计数据
+3. 根据数据优化 Agent 性能
+4. 管理用户权限和内容审核
+
+#### 第五步：创建自定义工具
+1. 进入工具创建界面
+2. 设计工具功能和参数
+3. 编写工具逻辑代码
+4. 测试和发布工具
+
+#### 第六步：搭建知识库
+1. 创建新的知识库项目
+2. 上传和导入知识文档
+3. 配置知识处理参数
+4. 训练和优化知识检索
 
 #### 🌐 部署场景示例
 
@@ -108,7 +271,7 @@ docker run -d \
 
 ```bash
 # 1. 克隆项目
-git clone https://github.com/lucky-aeon/AgentX.git
+git clone https://github.com/Mantraa-Zzz/AgentX.git
 cd AgentX/deploy
 
 # 2. 启动开发环境（Linux/macOS）
@@ -168,7 +331,7 @@ AgentX使用`.env`配置文件进行环境变量管理，支持丰富的自定�
 
 ```bash
 # 1. 获取配置模板
-curl -O https://raw.githubusercontent.com/lucky-aeon/AgentX/main/.env.example
+curl -O https://raw.githubusercontent.com/Mantraa-Zzz/AgentX/main/.env.example
 
 # 2. 创建配置文件
 cp .env.example .env
@@ -272,36 +435,8 @@ STRIPE_SECRET_KEY=your_stripe_secret_key
 | [开发部署指南](deploy/README.md) | 开发者环境配置 |
 | [故障排查手册](docs/deployment/TROUBLESHOOTING.md) | 问题诊断和解决 |
 
-## 功能介绍
-
-## Contributors
-
-[![AgentX](https://contrib.rocks/image?repo=lucky-aeon/agentX)](https://contrib.rocks/image?repo=lucky-aeon/agentX)
-
-## Star History
-
-[![Star History Chart](https://api.star-history.com/svg?repos=lucky-aeon/agentX&type=Date)](https://api.star-history.com/svg?repos=lucky-aeon/agentX&type=Date)
 
 
-## 联系我们
 
-我们致力于构建一个活跃的开发者社区，欢迎各种形式的交流与合作！
 
-### 📱 私人微信
-如有技术问题或商务合作，可添加开发者微信：
 
-<img src="docs/images/wechat.jpg" alt="私人微信" width="200"/>
-
-### 👥 微信交流群
-加入我们的技术交流群，与更多开发者一起讨论：
-
-<img src="docs/images/group.jpg" alt="微信交流群" width="200"/>
-
-### 📢 微信公众号
-关注我们的公众号，获取最新技术动态和产品更新：
-
-<img src="docs/images/微信公众号.jpg" alt="微信公众号" width="200"/>
-
----
-
-**如果二维码过期或无法扫描，请通过私人微信联系我。**
